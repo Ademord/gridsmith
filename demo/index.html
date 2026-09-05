@@ -3206,6 +3206,7 @@ html[data-theme] .lbmeta input:focus-visible { outline: 2px solid var(--acc); ou
 <style>/* Guidance adapts to the planner's four existing themes. */
 .guide-dock {position:fixed;z-index:40;right:22px;bottom:18px;display:flex;gap:18px;align-items:center;max-width:calc(100vw - 28px);padding:14px 16px;border:1px solid var(--line,#454740);border-radius:12px;background:var(--surface,#242622);color:var(--ink,#f4f5ed);box-shadow:0 12px 40px #0004}
 .guide-dock[hidden]{display:none}.guide-dock strong{display:block;font-size:13px}.guide-dock span{display:block;font-size:12px;max-width:310px;color:var(--mut,#aaa)}
+body:has(.lightbox.on) .guide-dock,body:has(dialog[open]) .guide-dock{display:none}
 .guide-shade{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;pointer-events:none;background:transparent;overflow:hidden}
 .guide-shade path{fill:#0b101578}.guide-shade[data-paused=true] path{fill:#0b10152b}.guide-shade svg{display:block}
 .guide-card{position:fixed;inset:auto;margin:0;padding:17px;border:1px solid var(--line,#55584f);border-radius:12px;background:var(--surface,#242622);color:var(--ink,#f4f5ed);box-shadow:0 16px 60px #0005;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;font:13px/1.55 system-ui,sans-serif}

@@ -149,13 +149,13 @@
     },
     {
       "path": "demo/build-info.json",
-      "sha256": "cf17686c82a027074295ed758483faca81c897588b8701f25f34b2f077623242",
+      "sha256": "e50c7758d0948b698cf4e29ecbba4c1f463c49c26f14e3e7529a64cafcd36cd8",
       "bytes": 197
     },
     {
       "path": "demo/index.html",
-      "sha256": "b8be1dffe8d929170f81e0f45bd8361f308a0d40333961e329dee071ea0a5633",
-      "bytes": 5330130
+      "sha256": "017dfa2407670f33b9baba1f173e53bc842ac645703a2ce256957d9ec903c7ed",
+      "bytes": 5330214
     },
     {
       "path": "demo_src/guide.css",
