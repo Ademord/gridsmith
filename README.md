@@ -2,11 +2,13 @@
 
 A feed planner that keeps your photos and layouts in your browser. Arrange a grid, review crops from a collage, save named drafts, and download your posts in order. Dates are planning notes; Gridsmith does not publish to Instagram.
 
-[**Open the live demo**](https://ademord.github.io/gridsmith/) · [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.0.0/gridsmith-demo.html) · [Source](https://github.com/Ademord/gridsmith) · [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
+[GitHub Pages demo (publication pending)](https://ademord.github.io/gridsmith/) Ã‚Â· [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.0.0/gridsmith-demo.html) Ã‚Â· [Source](https://github.com/Ademord/gridsmith) Ã‚Â· [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
+
+GitHub Pages publication is waiting for approval to make this reviewed repository public. The offline demo and local preview work independently of hosting.
 
 ![Gridsmith sample workspace](docs/images/workspace.png)
 
-The demo starts with **12 planned images, six library images and three posted references**. The first 18 images are owner-approved, previously unposted generated images, published as 300 × 400 PNGs with metadata removed. The three abstract posted references are fictional. Actual posted photos and saved personal workspaces are excluded.
+The demo starts with **12 planned images, six library images and three posted references**. The first 18 images are owner-approved, previously unposted generated images, published as 300 Ãƒâ€” 400 PNGs with metadata removed. The three abstract posted references are fictional. Actual posted photos and saved personal workspaces are excluded.
 
 Select **Start tour** to explore the planner, or arrange the samples yourself. The [demo guide](DEMO-GUIDE.md) covers both paths.
 
@@ -29,7 +31,7 @@ Visit the localhost address printed by the server. The app has no account, backe
 - Save a JSON backup including imported photos. Add the backup through **Add photos** to restore it.
 - Export a ZIP with numbered JPEGs, captions, dates, and an image manifest that records actual dimensions and source quality.
 
-Posted reference cards stay at the end of the feed. ZIP exports include them and exclude the library. The included sample cards are 300 × 400 pixels; exporting does not create higher resolution originals.
+Posted reference cards stay at the end of the feed. ZIP exports include them and exclude the library. The included sample cards are 300 Ãƒâ€” 400 pixels; exporting does not create higher resolution originals.
 
 See [the short demo guide](DEMO-GUIDE.md) and [storage and security notes](SECURITY.md).
 

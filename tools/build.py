@@ -12,6 +12,15 @@ ROOT = Path(__file__).resolve().parents[1]
 MODULES = ['drafts', 'exports', 'checks', 'workspace', 'detection', 'import-storage', 'import-review', 'themes']
 PALETTES = [('#243e41','#bdd9bd'),('#54466a','#c7b4e8'),('#9b5138','#eed1ad'),('#324b78','#b1d4e8'),
             ('#6f7135','#e1e5ac'),('#612f45','#e7b1c1'),('#224f50','#9dd1c6'),('#744d31','#ebcba1')]
+# Canonical encodings preserve the approved HTML across platform PNG/zlib builds.
+# Their decoded pixels must still equal the generator below, without tolerance.
+CANONICAL_PNGS = {
+    'grid-4x4': '1b07091b3e0062d33d6fdd6b2c28f1d37e3a392aa9e7965b240e43f54e116bea',
+    'grid-6x5': 'd92cd2eb09d9596c218bb741accdd279fd3f2811d2822c2bd97b52a1e450a651',
+    'sample_19': '359599b5ffc7868811290e1a5d81c1dd7e3593901d986725487c6e89c338fd2c',
+    'sample_20': 'bf52fa1240fb0095d4ab22613352c2415e7c19de00d218545d46be0a605cec58',
+    'sample_21': 'ccc07c292ba1ed59c554c3ece1e2d298623dde8f46613ef8fd733a1cc25adc80',
+}
 
 def rgb(value):
     return tuple(int(value[i:i+2], 16) for i in (1,3,5))
@@ -31,10 +40,16 @@ def sample(number, size=(300,400)):
     draw.text((width*.12,height*.83), f'SAMPLE {number:02}', fill=b, font_size=max(11,width//20))
     return im
 
-def png(im):
-    stream = io.BytesIO()
-    im.save(stream, format='PNG', optimize=False)
-    return stream.getvalue()
+def canonical_png(name, expected):
+    payload = (ROOT/'assets'/'generated'/(name+'.png')).read_bytes()
+    if hashlib.sha256(payload).hexdigest() != CANONICAL_PNGS[name]:
+        raise ValueError('Canonical PNG hash mismatch: '+name)
+    with Image.open(io.BytesIO(payload)) as actual:
+        if actual.format != 'PNG' or actual.mode != expected.mode or actual.size != expected.size:
+            raise ValueError('Canonical PNG format or dimensions mismatch: '+name)
+        if actual.tobytes() != expected.tobytes():
+            raise ValueError('Generated pixels differ from canonical PNG: '+name)
+    return payload
 
 def build(check=False):
     src = ROOT / 'planner_src'
@@ -49,7 +64,7 @@ def build(check=False):
         if hashlib.sha256(payload).hexdigest() != entry['sha256']:
             raise ValueError('Approved sample hash mismatch')
         payloads.append(payload)
-    manifest = [{'id':f'sample_{n:02}', 'src':'data:image/png;base64,'+base64.b64encode(payloads[n-1] if n<=18 else png(sample(n))).decode(), 'locked': n>18} for n in range(1,22)]
+    manifest = [{'id':f'sample_{n:02}', 'src':'data:image/png;base64,'+base64.b64encode(payloads[n-1] if n<=18 else canonical_png(f'sample_{n:02}',sample(n))).decode(), 'locked': n>18} for n in range(1,22)]
     state = {'order':[m['id'] for m in manifest[:12]], 'backlog':[m['id'] for m in manifest[12:18]], 'cols':3,
              'railw':0,'railh':False,'meta':{},'drafts':[]}
     app = (src / 'app.js').read_text(encoding='utf-8')
@@ -70,7 +85,7 @@ def build(check=False):
         for row in range(rows):
             for col in range(columns):
                 grid.paste(sample(row*columns+col+1,(side,side)),(col*(side+gutter),row*(side+gutter)))
-        outputs[ROOT/'tests'/'fixtures'/f'grid-{columns}x{rows}.png'] = png(grid)
+        outputs[ROOT/'tests'/'fixtures'/f'grid-{columns}x{rows}.png'] = canonical_png(f'grid-{columns}x{rows}',grid)
     guide_css = (ROOT/'demo_src'/'guide.css').read_text(encoding='utf-8')
     guide_js = (ROOT/'demo_src'/'guide.js').read_text(encoding='utf-8').replace('</script', '<\\/script')
     guide_fixture = {'src':'data:image/png;base64,'+base64.b64encode(outputs[ROOT/'tests'/'fixtures'/'grid-4x4.png']).decode(), 'name':'gridsmith-sample-grid.png', 'rows':4, 'columns':4, 'gutter':3}

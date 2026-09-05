@@ -29,13 +29,13 @@
     },
     {
       "path": "HANDOFF.md",
-      "sha256": "37f40ab3f8888bdf79bb2ca18c890bb3ae5418ef3d478a99102026b43e20ef47",
-      "bytes": 2289
+      "sha256": "a97bd82fa6ba4e62bc375ba9b4f5ce50adbb790879e64f8c39f839c2ad27d0ef",
+      "bytes": 2928
     },
     {
       "path": "README.md",
-      "sha256": "c2c94077080434e01b653435d583615cf25c4ef86e916f26b45392bf7a7d3ab2",
-      "bytes": 6184
+      "sha256": "bdc49fbea16f9e95264fd71b96f7cde6b11c6c11b3bce7879921287e4c773e19",
+      "bytes": 6399
     },
     {
       "path": "SECURITY.md",
@@ -44,13 +44,38 @@
     },
     {
       "path": "TODO.md",
-      "sha256": "a1a6fdfa125f55e340a40fc9aa68ffc8ec1506cebc07ff1ea32c8ab1ffb65f33",
-      "bytes": 742
+      "sha256": "8dc94cfc3e926151e95ffcf4d05b8a885cffc070ef9867d2230a3380c4e9edc4",
+      "bytes": 958
     },
     {
       "path": "assets/README.md",
       "sha256": "b0168a1aec14fdf9e1fbd14f7f6e47713331c27edef85c44ed0dc84e6e1af773",
       "bytes": 571
+    },
+    {
+      "path": "assets/generated/grid-4x4.png",
+      "sha256": "1b07091b3e0062d33d6fdd6b2c28f1d37e3a392aa9e7965b240e43f54e116bea",
+      "bytes": 89361
+    },
+    {
+      "path": "assets/generated/grid-6x5.png",
+      "sha256": "d92cd2eb09d9596c218bb741accdd279fd3f2811d2822c2bd97b52a1e450a651",
+      "bytes": 168171
+    },
+    {
+      "path": "assets/generated/sample_19.png",
+      "sha256": "359599b5ffc7868811290e1a5d81c1dd7e3593901d986725487c6e89c338fd2c",
+      "bytes": 27651
+    },
+    {
+      "path": "assets/generated/sample_20.png",
+      "sha256": "bf52fa1240fb0095d4ab22613352c2415e7c19de00d218545d46be0a605cec58",
+      "bytes": 29132
+    },
+    {
+      "path": "assets/generated/sample_21.png",
+      "sha256": "ccc07c292ba1ed59c554c3ece1e2d298623dde8f46613ef8fd733a1cc25adc80",
+      "bytes": 24983
     },
     {
       "path": "assets/manifest.json",
@@ -304,8 +329,8 @@
     },
     {
       "path": "tools/build.py",
-      "sha256": "932a07ded94e07b42d0a1b08a0f84f2eb58dde372f77cb3b8916fc8b13bef10a",
-      "bytes": 5901
+      "sha256": "a283769064075eae0a4e433cdb00a46f70dca3c562fec6f4c42dfdf4aa414238",
+      "bytes": 7072
     },
     {
       "path": "tools/screenshots.mjs",
