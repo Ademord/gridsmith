@@ -1,0 +1,325 @@
+{
+  "schema_version": 1,
+  "description": "Exact source, tests, documentation and generated demo files included in this release. This inventory file excludes its own recursive hash.",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "7846b37551c23529eb00c68fbb5a435390e922d9db2625cb88681c31746b289e",
+      "bytes": 31
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "a1ea3617139580514b07eaabd544bc401dc6d1a8d8cb76249b43201d992174da",
+      "bytes": 897
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "sha256": "cc97d15878f2e1b1132a0ae1aa90673fd75e2177a9180d90c3baf40460be47b1",
+      "bytes": 1294
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "9c38d072ff6307ff7c58a85982aa3aedcc8d550c0e3a61ab530646fdaff4ae29",
+      "bytes": 154
+    },
+    {
+      "path": "DEMO-GUIDE.md",
+      "sha256": "6b30013b4925de4b65cba8a67eb2a2eeb6226f0e390deb6e419d0181d9c5805f",
+      "bytes": 3270
+    },
+    {
+      "path": "HANDOFF.md",
+      "sha256": "37f40ab3f8888bdf79bb2ca18c890bb3ae5418ef3d478a99102026b43e20ef47",
+      "bytes": 2289
+    },
+    {
+      "path": "README.md",
+      "sha256": "c2c94077080434e01b653435d583615cf25c4ef86e916f26b45392bf7a7d3ab2",
+      "bytes": 6184
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "8d88dab3d55f348c0f49600779973f4fa2445065dc80ce5a3a2cffd04d5c004a",
+      "bytes": 2232
+    },
+    {
+      "path": "TODO.md",
+      "sha256": "a1a6fdfa125f55e340a40fc9aa68ffc8ec1506cebc07ff1ea32c8ab1ffb65f33",
+      "bytes": 742
+    },
+    {
+      "path": "assets/README.md",
+      "sha256": "b0168a1aec14fdf9e1fbd14f7f6e47713331c27edef85c44ed0dc84e6e1af773",
+      "bytes": 571
+    },
+    {
+      "path": "assets/manifest.json",
+      "sha256": "fd7ecd5eab88493af4cbd959a538f93fba80cc0bd84adc5be314bbed6ec9a07d",
+      "bytes": 3171
+    },
+    {
+      "path": "assets/sample_01.png",
+      "sha256": "835d670a34c8fe4b4dcbfa3338547b98f551c92b5f1045b81f67c275fbb41a0a",
+      "bytes": 202884
+    },
+    {
+      "path": "assets/sample_02.png",
+      "sha256": "3da3007b78d394b0ecf578e05f3f7d6ba72d2e44d9e85f751d6f7372f3614dbd",
+      "bytes": 175735
+    },
+    {
+      "path": "assets/sample_03.png",
+      "sha256": "a97cd4b9745d27bd94a5a096e55c87d419078331e52acd666f6c94e91b0d70bd",
+      "bytes": 168468
+    },
+    {
+      "path": "assets/sample_04.png",
+      "sha256": "c53c0796bd3856da78d2d38ef7a50db7b31a4043e1365272f55ee798a59bf6ba",
+      "bytes": 226151
+    },
+    {
+      "path": "assets/sample_05.png",
+      "sha256": "29eb83c8c223cac6abca4d82f8834df65195b329a4d702e7dbf004a6b2f1dac7",
+      "bytes": 158626
+    },
+    {
+      "path": "assets/sample_06.png",
+      "sha256": "8a665efc90410ae45ff8594db3f79ea32f992204e42f83361b88f5d8d0be23c8",
+      "bytes": 165193
+    },
+    {
+      "path": "assets/sample_07.png",
+      "sha256": "5c89bb49a5cf729479a6b1596b67135f34f9d835903265b35970fed22fd76d40",
+      "bytes": 274367
+    },
+    {
+      "path": "assets/sample_08.png",
+      "sha256": "b085c939c03ce40d29b8b253859bbc1970cec4ee0a328fff7016222823481023",
+      "bytes": 243048
+    },
+    {
+      "path": "assets/sample_09.png",
+      "sha256": "59392ed39cfb5d30921b76a5f61cee835037ab5f81201405eb1e2ba96e10a6a5",
+      "bytes": 205296
+    },
+    {
+      "path": "assets/sample_10.png",
+      "sha256": "007153ff0aaaccc7b31e9d969f863953d5867596e77ae5df925b9926010b7d66",
+      "bytes": 213514
+    },
+    {
+      "path": "assets/sample_11.png",
+      "sha256": "10e2363e8044756fc7e4ae5e34813263961c40dbed489df5619569ae1f197326",
+      "bytes": 163968
+    },
+    {
+      "path": "assets/sample_12.png",
+      "sha256": "1cca5ccc80cd4f104edebfde08aeb98e4711623ee425ae60d8a6863ac3e91e46",
+      "bytes": 165667
+    },
+    {
+      "path": "assets/sample_13.png",
+      "sha256": "c3c3683aaf02ae9c489092f1b00fb77f8aa1cf93dbae44f6d083544005686a5f",
+      "bytes": 218725
+    },
+    {
+      "path": "assets/sample_14.png",
+      "sha256": "529f7e085baaf3dcc9fac4bf1223b860f806274c821add83f5340cfa519b52aa",
+      "bytes": 182726
+    },
+    {
+      "path": "assets/sample_15.png",
+      "sha256": "791c833dd3e60d06d518064233310d40d9e7ba364851abf48d32714826d24737",
+      "bytes": 206218
+    },
+    {
+      "path": "assets/sample_16.png",
+      "sha256": "e09f17836994de5acd0407aa486c62ef0dda236cb50bafd47ee289f71ad5774c",
+      "bytes": 204585
+    },
+    {
+      "path": "assets/sample_17.png",
+      "sha256": "f46b69ed59e924644866bbe1bd0b6a5fb9434d6083ddd819d7d01cf03d8a07a1",
+      "bytes": 241320
+    },
+    {
+      "path": "assets/sample_18.png",
+      "sha256": "5e9634712203f0c2bc4a683c8a59c2a91f09927b1c57d2db7d30332359e27142",
+      "bytes": 210820
+    },
+    {
+      "path": "demo/build-info.json",
+      "sha256": "cf17686c82a027074295ed758483faca81c897588b8701f25f34b2f077623242",
+      "bytes": 197
+    },
+    {
+      "path": "demo/index.html",
+      "sha256": "b8be1dffe8d929170f81e0f45bd8361f308a0d40333961e329dee071ea0a5633",
+      "bytes": 5330130
+    },
+    {
+      "path": "demo_src/guide.css",
+      "sha256": "5849d597c69a51cf6da4f010bf6cf239475f6944c5cb78a16e1ea73fc059dcb6",
+      "bytes": 6286
+    },
+    {
+      "path": "demo_src/guide.js",
+      "sha256": "3f89425f4722c3ea8fae3941876d2cc96ff5f6320d2e37429c1ae98986381514",
+      "bytes": 26708
+    },
+    {
+      "path": "docs/images/README.md",
+      "sha256": "64cebc85112e610b90f2a8aacd33c3e78a9791dc39e7efd5fc7ea064bebbeb88",
+      "bytes": 291
+    },
+    {
+      "path": "docs/images/guided-tour.png",
+      "sha256": "308132ab34fd7c792e873970c57dec95fbf8515ace62e5b923acb59ed25ed737",
+      "bytes": 866714
+    },
+    {
+      "path": "docs/images/import-review.png",
+      "sha256": "4cb95a2dfe9a4df2840554f4f4a56529a62ebd1cdf0bd4c33e7b1ec2cafff61b",
+      "bytes": 465014
+    },
+    {
+      "path": "docs/images/mobile.png",
+      "sha256": "e93131822f6fde33b5cdeab02717e35e915875a64fd59192922c72384e3e26b1",
+      "bytes": 273391
+    },
+    {
+      "path": "docs/images/workspace-light.png",
+      "sha256": "7b3e0b59b8c9f5c99e1bc48ba4e843171396eb7c238459719022e5a0e3476716",
+      "bytes": 1147083
+    },
+    {
+      "path": "docs/images/workspace.png",
+      "sha256": "b1347092e5a6660ff3be72c7b0203086efc83f04a14fe30e0679596a1c2e640d",
+      "bytes": 1145777
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "9bf662d113292532c79a58550d8b402a5318ca496e748df64bff4f720e882b34",
+      "bytes": 1778
+    },
+    {
+      "path": "package.json",
+      "sha256": "58b2b1065f2d50e16d4122266c9c202fa6bf6afbd8f942b815b77685173a3390",
+      "bytes": 424
+    },
+    {
+      "path": "planner_src/app.js",
+      "sha256": "807d224de6c2b9bb9d631460e740b9d79c5777513e4708f9ae411cb9eed8eec6",
+      "bytes": 90212
+    },
+    {
+      "path": "planner_src/base.css",
+      "sha256": "596ae144e5f5cd1e6ea4b7618b0411fb1b9f21c57297c76d1764e9fd90e73ca4",
+      "bytes": 11326
+    },
+    {
+      "path": "planner_src/checks.js",
+      "sha256": "a0b4a5153a7545763ecdc86b93baf632db2f24889ba98851b09e550c4183d63d",
+      "bytes": 10275
+    },
+    {
+      "path": "planner_src/design.css",
+      "sha256": "a20aa8e85ca35ff772572563fa798269542de2b70dcb20b14df24448bc661cb9",
+      "bytes": 19681
+    },
+    {
+      "path": "planner_src/detection.js",
+      "sha256": "41a3c3bb29ef4346fa8e7f931ebe2dc90f482847b934d45ccde7da4cea133cf6",
+      "bytes": 14016
+    },
+    {
+      "path": "planner_src/drafts.js",
+      "sha256": "880460ea8961599d73130e287756e255ffe6b6fa38cb4cfcbebc1622f1b290f9",
+      "bytes": 14246
+    },
+    {
+      "path": "planner_src/exports.js",
+      "sha256": "fcb73b8735fc81575a49ce0da24f9c5f44e6992899a8affaab897510ada65c8b",
+      "bytes": 10828
+    },
+    {
+      "path": "planner_src/import-review.css",
+      "sha256": "2ed2549f9945a63abddc4d0fd2129ae929f6abd4cd52122317ad6c60819aae8b",
+      "bytes": 6973
+    },
+    {
+      "path": "planner_src/import-review.js",
+      "sha256": "881b8f3a964f8bddec3c6d26a597e768d2149f477de7b4ff16c4e166fa59c30e",
+      "bytes": 21896
+    },
+    {
+      "path": "planner_src/import-storage.js",
+      "sha256": "5ed2a991edd43dcc560e48ba159d447934f2aa077a4499e82a1df964cc3245c4",
+      "bytes": 6092
+    },
+    {
+      "path": "planner_src/page.html",
+      "sha256": "0f6e9a0ad8abb2ed6cc9c366647d3d40ee94d0e42ce65ce0db55c6b68118f989",
+      "bytes": 7209
+    },
+    {
+      "path": "planner_src/themes.css",
+      "sha256": "bd79a864d60a8b90979ea50bcd7b6376c3e4dd83fe32f66f55f30c4e821b0e12",
+      "bytes": 8503
+    },
+    {
+      "path": "planner_src/themes.js",
+      "sha256": "213b5242768185f5440d23b1fb277e78f9381170a6a6966272a7b4262a001acb",
+      "bytes": 2634
+    },
+    {
+      "path": "planner_src/workspace.js",
+      "sha256": "752bea9391f935077a482eb263329510af45a228c4b77675a5bd3c51e3cd7217",
+      "bytes": 6686
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "41b54a6fb2918667ca47a61d73b522629d84490f3d78f0f20b21135faba10d35",
+      "bytes": 15
+    },
+    {
+      "path": "tests/fixtures/grid-4x4.png",
+      "sha256": "1b07091b3e0062d33d6fdd6b2c28f1d37e3a392aa9e7965b240e43f54e116bea",
+      "bytes": 89361
+    },
+    {
+      "path": "tests/fixtures/grid-6x5.png",
+      "sha256": "d92cd2eb09d9596c218bb741accdd279fd3f2811d2822c2bd97b52a1e450a651",
+      "bytes": 168171
+    },
+    {
+      "path": "tests/planner.test.mjs",
+      "sha256": "fb34b16ff6979dc1250b4430ff96b3f5f8a41d9fbef4aa0b1166c4109e831e8c",
+      "bytes": 29325
+    },
+    {
+      "path": "tools/browser.mjs",
+      "sha256": "45dee9b3e21ce3b639e42b5f7b0d9fab2f5f8c2f2509e97b4e9ecd3d57ddbbfe",
+      "bytes": 554
+    },
+    {
+      "path": "tools/build.py",
+      "sha256": "932a07ded94e07b42d0a1b08a0f84f2eb58dde372f77cb3b8916fc8b13bef10a",
+      "bytes": 5901
+    },
+    {
+      "path": "tools/screenshots.mjs",
+      "sha256": "c4b93a6ece3a1c22ceb261886bb0e00c5b5c6d1661ceb9fefe6869c5fb8efd53",
+      "bytes": 2364
+    },
+    {
+      "path": "tools/serve.mjs",
+      "sha256": "23bbcaa402cd7d46d4c3366826119965058351646ea8261858bf9921293c8436",
+      "bytes": 1643
+    }
+  ],
+  "samples": "18 approved demo images, 3 generated reference cards and two generated grid fixtures. No real posted photos, private captions, saved user layout, recorded activity or private project history are included.",
+  "screenshots": "Captured from fresh sessions with approved demo images and generated fixtures; see docs/images/README.md.",
+  "history": "Fresh repository history with a GitHub no-reply identity.",
+  "publication": "The offline demo requires no account or recorder. Source repository access is controlled by its GitHub visibility setting."
+}

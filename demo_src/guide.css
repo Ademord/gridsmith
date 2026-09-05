@@ -1,0 +1,33 @@
+/* Guidance adapts to the planner's four existing themes. */
+.guide-dock {position:fixed;z-index:40;right:22px;bottom:18px;display:flex;gap:18px;align-items:center;max-width:calc(100vw - 28px);padding:14px 16px;border:1px solid var(--line,#454740);border-radius:12px;background:var(--surface,#242622);color:var(--ink,#f4f5ed);box-shadow:0 12px 40px #0004}
+.guide-dock[hidden]{display:none}.guide-dock strong{display:block;font-size:13px}.guide-dock span{display:block;font-size:12px;max-width:310px;color:var(--mut,#aaa)}
+.guide-shade{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;pointer-events:none;background:transparent;overflow:hidden}
+.guide-shade path{fill:#0b101578}.guide-shade[data-paused=true] path{fill:#0b10152b}.guide-shade svg{display:block}
+.guide-card{position:fixed;inset:auto;margin:0;padding:17px;border:1px solid var(--line,#55584f);border-radius:12px;background:var(--surface,#242622);color:var(--ink,#f4f5ed);box-shadow:0 16px 60px #0005;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow:auto;font:13px/1.55 system-ui,sans-serif}
+.guide-card::backdrop,.guide-shade::backdrop,.guide-hint::backdrop{background:transparent;pointer-events:none}.guide-header{display:flex;justify-content:space-between;font-size:11px;color:var(--mut,#aaa)}
+.guide-card progress{display:block;accent-color:var(--acc,#d9f98b);width:100%;height:4px;margin:9px 0 14px}.guide-card h2{font-size:18px;line-height:1.3;margin:0 0 9px}.guide-card p{margin:0 0 13px}.guide-card #guide-note{padding:9px;border:1px solid var(--line,#454740);border-radius:5px;font-size:12px;background:var(--bg,#191b17)}
+.guide-controls{display:flex;gap:7px;flex-wrap:wrap}.guide-card button{font:inherit;font-size:12px;padding:8px 10px;min-height:36px;border:1px solid var(--line,#55584f);border-radius:6px;color:inherit;background:var(--bg,#191b17);cursor:pointer}.guide-card button.btn-primary{background:var(--acc,#d9f98b);color:var(--on-acc,#17200c);border-color:transparent}.guide-card button:disabled{opacity:.5;cursor:wait}
+.guide-options{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line,#454740);margin-top:12px;padding-top:11px}.guide-options label{display:flex;align-items:center;gap:6px;font-size:11px}.guide-options select{font:inherit;color:inherit;background:var(--bg,#191b17);border:1px solid var(--line,#55584f);border-radius:4px;padding:5px}.guide-options button{font-size:11px;border:0;padding:3px;background:none;min-height:28px}.guide-card #guide-instruction{font-size:11px;color:var(--mut,#aaa);margin:11px 0 0}
+.guide-target{outline:2px solid var(--acc,#d9f98b);outline-offset:5px}.guide-help{display:inline-grid;place-items:center;width:20px;min-width:20px;height:20px;min-height:20px;margin-left:7px;padding:0;border:1px solid currentColor;border-radius:50%;color:var(--mut,#aaa);background:transparent;font:11px/1 system-ui;cursor:help;vertical-align:middle}.guide-hint{position:fixed;inset:auto;margin:0;max-width:280px;box-sizing:border-box;padding:11px 13px;border:1px solid var(--line,#55584f);border-radius:7px;background:var(--surface,#242622);color:var(--ink,#f4f5ed);font:12px/1.6 system-ui;box-shadow:0 6px 25px #0004}
+.guide-card :focus-visible,.guide-dock :focus-visible,.guide-help:focus-visible{outline:2px solid var(--acc,#d9f98b);outline-offset:3px}
+html[data-theme=light] .guide-card,html[data-theme=light] .guide-dock,html[data-theme=light] .guide-hint{background:#fff;color:#20271c;border-color:#bdc5b5}html[data-theme=light] .guide-card button:not(.btn-primary),html[data-theme=light] .guide-options select,html[data-theme=light] #guide-note{background:#f4f6f0;color:#20271c}html[data-theme=light] .guide-header,html[data-theme=light] .guide-card #guide-instruction,html[data-theme=light] .guide-dock span{color:#59624e}
+/* The existing photo lightbox positions all descendant buttons absolutely. */
+#guide-card button{position:static;inset:auto;transform:none;display:inline-flex;align-items:center;justify-content:center;width:auto;height:auto;margin:0;opacity:1;visibility:visible}
+#guide-card button[hidden]{display:none!important}
+.lightbox .guide-help{position:static;inset:auto;transform:none;width:20px;height:20px;min-height:20px;display:inline-grid}
+.guide-shade svg{width:100%;height:100%;max-width:none;max-height:none;stroke:none}
+.lbmeta>.guide-field-help{flex:none;align-self:flex-end;margin:0}
+/* Keep guidance in its own band while a constrained editor remains scrollable. */
+.lightbox.guide-constrained{top:var(--guide-clearance);bottom:0;height:calc(100dvh - var(--guide-clearance));overflow-y:auto;scroll-padding-top:12px;scroll-padding-bottom:12px}
+dialog.guide-constrained{top:0;bottom:auto;margin:var(--guide-clearance) auto 12px;max-height:calc(100dvh - var(--guide-clearance) - 12px)!important;overflow:auto}
+#guide-card[data-compact=true] #guide-description{display:none}
+#guide-card[data-compact=true] #guide-note{margin-bottom:8px;padding:6px;font-size:11px}
+#guide-card[data-compact=true]{padding:11px 13px}
+#guide-card[data-compact=true] progress{margin:5px 0 8px}
+#guide-card[data-compact=true] h2{font-size:15px;margin-bottom:8px}
+#guide-card[data-compact=true] .guide-options{margin-top:7px;padding-top:5px}
+#guide-card[data-compact=true] #guide-instruction{margin-top:6px}
+@media(max-width:600px){.guide-dock{right:10px;left:10px;bottom:82px;gap:10px;padding:11px}.guide-dock span{font-size:11px}.guide-dock .btn-primary{white-space:nowrap}.guide-card{padding:13px}.guide-card h2{font-size:16px}.guide-card p{font-size:12px;margin-bottom:10px}.guide-options{margin-top:9px;padding-top:8px}.guide-options button{padding:2px}.guide-card #guide-instruction{margin-top:8px}}
+@media(prefers-reduced-motion:reduce){.guide-card,.guide-shade,.guide-target{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.guide-card,.guide-dock,.guide-hint{border:2px solid CanvasText}.guide-shade{display:none!important}.guide-target{outline:3px solid Highlight}}
+@media print{.guide-card,.guide-dock,.guide-shade,.guide-hint,.guide-help{display:none!important}}

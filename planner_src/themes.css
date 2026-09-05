@@ -1,0 +1,177 @@
+/* Themes only change interface colors; photograph pixels and layout stay intact.
+   Violet follows flows-preview/site.css. Amber comes from lib/flowkit.css. */
+html[data-theme] button{transition:border-color .15s}
+:root,
+:root[data-theme="charcoal"] {
+  --bg: #141615;
+  --rail: #191c19;
+  --ink: #f1f3ed;
+  --mut: #a0a69d;
+  --line: #30352f;
+  --acc: #d9f98b;
+  --on-acc: #202916;
+  --acc-hover: #e7ffac;
+  --surface: #222720;
+  --surface-hover: #2b3227;
+  --surface-active: #303b26;
+  --input-bg: #141812;
+  --control-line: #637058;
+  --danger: #ff9b98;
+  --danger-bg: #38201e;
+  --on-danger: #2c1010;
+  --backdrop: #080b08bc;
+  --lightbox-bg: #0b0e0aee;
+  --shadow: #0005;
+  color-scheme: dark;
+}
+:root[data-theme="violet"] {
+  --bg: #0b0c0f;
+  --rail: #14161b;
+  --ink: #f0f0f3;
+  --mut: #a3a5b2;
+  --line: #30333d;
+  --acc: #b9a2ff;
+  --on-acc: #241638;
+  --acc-hover: #cbbaff;
+  --surface: #1b1d24;
+  --surface-hover: #2a2935;
+  --surface-active: #30283f;
+  --input-bg: #101115;
+  --control-line: #6e6a80;
+  --danger: #ffa0ac;
+  --danger-bg: #391d28;
+  --on-danger: #2c1018;
+  --backdrop: #050408c7;
+  --lightbox-bg: #0c0b12f2;
+  --shadow: #0006;
+  color-scheme: dark;
+}
+:root[data-theme="amber"] {
+  --bg: #171511;
+  --rail: #201c16;
+  --ink: #f2ece2;
+  --mut: #b0a596;
+  --line: #3c3429;
+  --acc: #f0a832;
+  --on-acc: #2b1b06;
+  --acc-hover: #ffc265;
+  --surface: #282219;
+  --surface-hover: #362d20;
+  --surface-active: #3e301c;
+  --input-bg: #17130e;
+  --control-line: #83705a;
+  --danger: #ff9d93;
+  --danger-bg: #3e221b;
+  --on-danger: #30120b;
+  --backdrop: #100b06c7;
+  --lightbox-bg: #120e09f2;
+  --shadow: #0006;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f5f4f8;
+  --rail: #ffffff;
+  --ink: #26232e;
+  --mut: #67616f;
+  --line: #d8d3e1;
+  --acc: #6544aa;
+  --on-acc: #ffffff;
+  --acc-hover: #53338f;
+  --surface: #eeebf3;
+  --surface-hover: #e2dceb;
+  --surface-active: #e5dcf6;
+  --input-bg: #ffffff;
+  --control-line: #93879e;
+  --danger: #a62d3e;
+  --danger-bg: #f9e4e7;
+  --on-danger: #ffffff;
+  --backdrop: #26232e66;
+  --lightbox-bg: #eeebf5f5;
+  --shadow: #26232e20;
+  color-scheme: light;
+}
+
+/* More menu: a native select supplies familiar keyboard and touch behavior. */
+.theme-field { display: grid; gap: 6px; margin: 5px; padding: 10px 3px 4px; border-top: 1px solid var(--line); }
+.theme-field > span { color: var(--mut); font-size: 11px; font-weight: 500; }
+.theme-field select { width: 100%; min-width: 0; min-height: 36px; border: 1px solid var(--control-line); border-radius: 6px; padding: 6px 8px; font: inherit; font-size: 13px; background: var(--input-bg); color: var(--ink); cursor: pointer; color-scheme: inherit; }
+.theme-field select:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+.theme-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Shared shell and states, including the library's compact mobile surface. */
+html[data-theme] body { background: var(--bg); color: var(--ink); }
+html[data-theme] .appbar { background: color-mix(in srgb, var(--rail) 97%, transparent); }
+html[data-theme] .sidebar,
+html[data-theme] .rail { background: var(--rail); border-color: var(--line); }
+html[data-theme] .rail { scrollbar-color: var(--control-line) transparent; }
+html[data-theme] button:hover { background: var(--surface-hover); border-color: var(--control-line); }
+html[data-theme] button:disabled:hover { border-color: var(--line); background: transparent; }
+html[data-theme] .btn-primary,
+html[data-theme] .skip-link { background: var(--acc); border-color: var(--acc); color: var(--on-acc); }
+html[data-theme] .btn-primary:hover { background: var(--acc-hover); border-color: var(--acc-hover); color: var(--on-acc); }
+html[data-theme] .brandmark i { background: var(--on-acc); }
+html[data-theme] .local-note i { background: var(--acc); }
+html[data-theme] .nav-button.active,
+html[data-theme] .colsw button.on,
+html[data-theme] #selectposts[aria-pressed="true"] { background: var(--surface-active); color: var(--acc); }
+html[data-theme] .profile-avatar { background: var(--surface-active); border-color: var(--control-line); color: var(--ink); }
+html[data-theme] .add-button { background: var(--surface); border-color: var(--control-line); }
+html[data-theme] .add-button:hover { background: var(--surface-hover); }
+html[data-theme] .view-switch { background: var(--input-bg); border-color: var(--line); }
+html[data-theme] .view-switch button.on { background: var(--surface-active); color: var(--ink); box-shadow: 0 1px 3px var(--shadow); }
+html[data-theme] .more-menu > div { background: var(--rail); border-color: var(--control-line); box-shadow: 0 10px 40px var(--shadow); }
+html[data-theme] #grid-context { color: var(--ink); }
+html[data-theme] .arrange-hint span { color: var(--mut); }
+html[data-theme] .tile,
+html[data-theme] .bitem { background: var(--surface); }
+html[data-theme] .rail.over { background: var(--surface-active); border-color: var(--acc); }
+html[data-theme] .library-search { background: var(--input-bg); border-color: var(--control-line); }
+html[data-theme] .library-search:focus-within { border-color: var(--acc); }
+html[data-theme] input::placeholder,
+html[data-theme] textarea::placeholder { color: var(--mut); opacity: 1; }
+html[data-theme] .library-upload { background: var(--surface); border-color: var(--control-line); color: var(--ink); }
+html[data-theme] .library-upload:hover { background: var(--surface-hover); }
+html[data-theme] .library-upload > span:first-child { color: var(--acc); }
+html[data-theme] .toast,
+html[data-theme] .selectchip,
+html[data-theme] .splitchip { background: var(--surface-active); border-color: var(--control-line); color: var(--ink); box-shadow: 0 5px 25px var(--shadow); }
+html[data-theme] .trash { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+html[data-theme] .trash.over { background: color-mix(in srgb, var(--danger-bg) 85%, var(--danger)); }
+html[data-theme] body.filedrag::after { background: color-mix(in srgb, var(--bg) 95%, transparent); color: var(--acc); }
+
+/* Photo overlays stay legible over any image, independent of interface theme. */
+html[data-theme] .tile .tbtn,
+html[data-theme] .bitem .bx,
+html[data-theme] .bitem .bsel { background: #101010c7; color: #fff; }
+html[data-theme] .tile:not(.locked)::before,
+html[data-theme] .tile[data-hasmeta]:hover::before { background: #101010b8; color: #fff; }
+html[data-theme] .tile.over::before { background: var(--acc); }
+html[data-theme] .tile.locked::after { background: #101010c7; color: #fff; }
+html[data-theme] .tile.selected::after,
+html[data-theme] .bitem.selected::after,
+html[data-theme] .tile .dl:hover,
+html[data-theme] .bitem .bsel:hover,
+html[data-theme] .select-mode .tile.selected .select,
+html[data-theme] .select-mode .bitem.selected .bsel { background: var(--acc); color: var(--on-acc); }
+html[data-theme] .tile .x:hover,
+html[data-theme] .bitem .bx:hover { background: var(--danger); color: var(--on-danger); }
+html[data-theme] .tile.swapover .swapchip { background: #101010bf; color: #fff; }
+
+/* Specificity also covers styles inserted later by the drafts/checks module. */
+html[data-theme] .panel-dialog,
+html[data-theme] .lbmeta { background: var(--rail); border-color: var(--control-line); color: var(--ink); box-shadow: 0 24px 90px var(--shadow); }
+html[data-theme] .panel-dialog::backdrop { background: var(--backdrop); }
+html[data-theme] .panel-dialog input,
+html[data-theme] .panel-dialog textarea,
+html[data-theme] .panel-dialog .draft-form input,
+html[data-theme] .lbmeta textarea,
+html[data-theme] .lbmeta input[type="date"] { background: var(--input-bg); border-color: var(--control-line); color: var(--ink); color-scheme: inherit; }
+html[data-theme] .help-row p { color: var(--mut); }
+html[data-theme] .lightbox { background: var(--lightbox-bg); }
+html[data-theme] .lightbox button { background: var(--surface); color: var(--ink); border-color: var(--control-line); }
+html[data-theme] .lightbox button:hover { background: var(--surface-hover); }
+html[data-theme] .lightbox .lbarrow { background: var(--surface); border-color: var(--control-line); }
+html[data-theme] .lightbox .lbarrow:hover { background: var(--surface-hover); }
+html[data-theme] .lbcount { color: var(--mut); }
+html[data-theme] .lbmeta textarea:focus-visible,
+html[data-theme] .lbmeta input:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }

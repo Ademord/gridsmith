@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Gridsmith | Feed planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Arrange your Instagram feed, save drafts and export your photos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23d9f98b'/%3E%3Cpath d='M8 8h7v7H8zm9 0h7v7h-7zM8 17h7v7H8zm9 0h7v7h-7z' fill='%23151813'/%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem('gridsmith.theme');if(['charcoal','violet','amber','light'].indexOf(t)>-1)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>__BASE_CSS__
+__DESIGN_CSS__
+__IMPORT_CSS__
+__THEMES_CSS__</style></head><body>
+<a href="#grid" class="skip-link">Skip to feed</a>
+<header class="appbar">
+  <a class="brand" href="#" aria-label="Gridsmith home"><span class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Gridsmith<span class="brand-divider"></span><span class="brand-sub">Sample workspace</span></a>
+  <div class="app-actions"><span class="local-note"><i></i>Stored in this browser</span><button id="savelayout" class="save-button" title="Download a backup of your layout">Save layout</button><button id="exportposts" class="btn-primary"><span aria-hidden="true">&#8599;</span> Export posts</button></div>
+</header>
+<nav class="sidebar" aria-label="Workspace">
+ <button id="plan-nav" class="nav-button active" aria-label="Feed planner"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Feed</span></button>
+ <button id="drafts-toggle" class="nav-button"><svg viewBox="0 0 24 24"><path d="M5 3h14v18l-7-4-7 4z"/></svg><span>Drafts</span></button>
+ <button id="checkfeed" class="nav-button"><svg viewBox="0 0 24 24"><path d="m4 12 5 5L20 5M19 13v7H4V4h9"/></svg><span>Review</span></button>
+ <span class="nav-space"></span>
+ <button id="helpbutton" class="nav-button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5m0 2v1"/></svg><span>Help</span></button>
+ <div class="profile-avatar" title="Sample workspace">S</div>
+</nav>
+<main class="main">
+ <div class="top"><div class="feed-title"><div class="eyebrow"><span class="status-dot"></span>INSTAGRAM</div><h1>Sample feed</h1><div class="n" id="count" aria-live="polite"></div></div><span class="sp"></span><button id="addimages" class="add-button"><span aria-hidden="true">+</span> Add photos</button><input id="collageinput" type="file" accept="image/*" multiple hidden><input id="fileinput" type="file" accept="image/*,application/json,.json" multiple hidden></div>
+ <div class="workspace-toolbar">
+  <div class="view-switch" role="group" aria-label="Feed view"><button id="planview" class="on" aria-pressed="true">Arrange</button><button id="feedpreview" aria-pressed="false">Preview</button></div>
+  <span class="toolbar-space"></span>
+  <div class="colsw" id="colsw" role="group" aria-label="Columns"><button data-c="3" title="3 columns">3</button><button data-c="4" title="4 columns">4</button><button data-c="5" title="5 columns">5</button></div>
+  <span class="toolbar-divider"></span><button id="undo" class="icon-button" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>&#8630;</button><button id="redo" class="icon-button" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled>&#8631;</button>
+  <details class="more-menu"><summary aria-label="More feed options">&#8943;</summary><div><button id="importcollage">Import collage...</button><button id="blank">Add blank post</button><button id="railtoggle">Hide backlog</button><button id="reset">Reset layout</button></div></details>
+ </div>
+ <div class="grid-meta"><span id="grid-context">Planned posts</span><button id="selectposts" aria-pressed="false">Select</button><span class="arrange-hint">Drag to arrange <span>&middot;</span> Click to edit</span><span class="preview-hint" hidden>3:4 profile grid</span></div>
+ <div class="grid" id="grid" tabindex="-1" aria-label="Feed posts"></div>
+ <footer class="feed-footer"><span>Your posted photos stay at the end.</span><button id="backtotop">Back to top &#8593;</button></footer>
+</main>
+<div class="rhandle" id="rhandle" title="Drag to resize the library" role="separator" aria-label="Library width"></div>
+<aside class="rail" id="rail" aria-label="Photo library">
+ <div class="library-heading"><div><h2>Library</h2><div class="rn" id="railcount" aria-live="polite"></div></div><button id="library-collapse" aria-label="Collapse library" aria-expanded="true" title="Collapse library">&#8964;</button><button id="library-add" aria-label="Add photos to library" title="Add photos">+</button></div>
+ <label class="library-search"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="library-search" type="search" placeholder="Search captions or file name" aria-label="Find a library photo"></label>
+ <div class="library-instruction">Drag into your feed, or click to add.</div>
+ <div id="railitems"></div><div id="library-no-results" hidden>No matching photos.</div>
+ <button class="library-upload" id="library-upload"><span aria-hidden="true">+</span><span>Add photos<span class="upload-note">Review grid images before importing</span></span></button>
+</aside>
+<div class="trash" id="trash">Drop here to delete</div><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="help-dialog" class="panel-dialog help-dialog"><div class="panel-head"><h2>Using your planner</h2><button class="dialog-close" aria-label="Close help">&#215;</button></div><div class="panel-body"><div class="help-row"><strong>Arrange</strong><p>Drag to the left edge of a photo to insert. Drop in the center to swap. On a phone, press and hold to drag.</p></div><div class="help-row"><strong>Edit a post</strong><p>Click a photo to preview it, add a caption or choose a date. Dates are planning notes; the planner does not post to Instagram.</p></div><div class="help-row"><strong>Select several</strong><p>Use the check button on a photo, or Ctrl/Cmd-click. Move or remove the selection together. Escape clears it.</p></div><div class="help-row"><strong>Keyboard</strong><p>Tab to a photo and press Enter to open it. Use Alt + arrow keys to move it. Ctrl/Cmd + Z undoes a change.</p></div><div class="help-row"><strong>Keep your work</strong><p>Changes stay in this browser. Save layout downloads a backup, including imported photos. Add that file to restore it on another device.</p></div><div class="help-row"><strong>Export</strong><p>Export posts saves a ZIP in feed order. Full-size photos are used when available. The export lists any smaller previews.</p></div><p class="muted">The included photos are approved demo samples. Add your own photos to try the planner. They stay in this browser.</p></div></dialog>
+<script id="savedstate" type="application/json">null</script><script id="bundled" type="application/json">__MANIFEST__</script>
+<script>__APP_JS__</script>
+</body></html>

@@ -1,0 +1,116 @@
+
+  :root{--bg:#000;--rail:#070707;--line:#262626;--ink:#f5f5f5;--mut:#8e8e8e;--acc:#e8b04b;--danger:#ed4956;--railw:132px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+  .main{margin-right:calc(var(--railw) + 10px)}
+  .top{max-width:820px;margin:0 auto;padding:20px 16px 10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .top h1{font-size:17px;font-weight:700;letter-spacing:.01em}
+  .top .n{color:var(--mut);font-size:13px}
+  .top .sp{flex:1}
+  button{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  button:hover{border-color:var(--mut)}
+  button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  button:disabled{opacity:.35;cursor:default}
+  button:disabled:hover{border-color:var(--line)}
+  .colsw{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .colsw button{border:none;border-radius:0;padding:6px 12px;color:var(--mut)}
+  .colsw button+button{border-left:1px solid var(--line)}
+  .colsw button.on{background:#1c1c1c;color:var(--ink)}
+  .hint{max-width:820px;margin:0 auto;padding:6px 16px 14px;color:var(--mut);font-size:12.5px}
+  .tabs{max-width:820px;margin:0 auto;display:flex;border-top:1px solid var(--line)}
+  .tabs div{flex:1;display:flex;justify-content:center;padding:12px 0;color:var(--mut)}
+  .tabs div.on{color:var(--ink);border-top:1px solid var(--ink);margin-top:-1px}
+  .tabs svg{width:22px;height:22px}
+  .grid{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:2px;padding-bottom:8px}
+  .tile{position:relative;aspect-ratio:3/4;background:#111;cursor:grab;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+  .tile img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  .tbtn{position:absolute;top:6px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.65);border:none;color:#fff;font-size:13px;line-height:1;display:none;align-items:center;justify-content:center;padding:0}
+  .tile:hover .tbtn{display:flex}
+  .tile .x{right:6px}
+  .tile .x:hover{background:var(--danger)}
+  .tile .dl{left:6px}
+  .tile .dl:hover{background:rgba(232,176,75,.85);color:#000}
+  .tile.dragging{opacity:.35}
+  .tile.over::before{content:"";position:absolute;left:-2px;top:0;bottom:0;width:3px;background:var(--acc);z-index:2}
+  .tile.swapover{outline:3px solid var(--acc);outline-offset:-3px}
+  .tile.swapover .swapchip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);color:var(--acc);font-size:13px;letter-spacing:.06em;font-weight:600;pointer-events:none}
+  .tile.justadded{outline:3px solid var(--acc);outline-offset:-3px;animation:addedfade 2.4s forwards}
+  @keyframes addedfade{0%,60%{outline-color:var(--acc)}100%{outline-color:transparent}}
+  @media (prefers-reduced-motion: reduce){.tile.justadded{animation:none}.bitem{transition:none}}
+  .tile.selected{outline:3px solid var(--acc);outline-offset:-3px}
+  .tile.selected::after{content:"\2713";position:absolute;right:6px;bottom:6px;width:22px;height:22px;border-radius:50%;background:var(--acc);color:#000;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:3}
+  .bitem.selected{outline:2px solid var(--acc);outline-offset:-2px}
+  .bitem.selected::after{content:"\2713";position:absolute;left:2px;bottom:2px;width:14px;height:14px;border-radius:50%;background:var(--acc);color:#000;font-size:9px;display:flex;align-items:center;justify-content:center;z-index:3}
+  .tile.locked{cursor:default}
+  .tile.locked::after{content:"POSTED";position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.7);color:var(--mut);font-size:9px;letter-spacing:.12em;padding:3px 7px;border-radius:4px;opacity:0;transition:opacity .15s}
+  .tile.locked:hover::after{opacity:1}
+  .tile[data-hasmeta]:hover::before{content:"";position:absolute;left:50%;top:6px;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--acc);z-index:2}
+  .endzone{aspect-ratio:3/4;border:1px dashed var(--line);border-radius:2px;display:none;align-items:center;justify-content:center;color:var(--mut);font-size:12px}
+  body.tiledrag .endzone{display:flex}
+  .endzone.over{border-color:var(--acc);color:var(--acc)}
+  .rail{position:fixed;right:0;top:0;bottom:0;width:var(--railw);background:var(--rail);border-left:1px solid var(--line);overflow:hidden auto;z-index:5;padding:12px 10px 20px}
+  .rail h2{font-size:11px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-bottom:4px}
+  .rail .rn{font-size:11px;color:var(--mut);margin-bottom:10px}
+  .rail.over{background:#0d0b06;border-left-color:var(--acc)}
+  .bitem{position:relative;width:100%;aspect-ratio:3/4;background:#111;cursor:grab;user-select:none;-webkit-touch-callout:none;transition:transform .13s;transform-origin:right center;touch-action:manipulation}
+  .bitem img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  .bitem:hover{transform:scale(1.75);z-index:7;box-shadow:0 4px 24px rgba(0,0,0,.8);transform-origin:center}
+  .bitem .bx{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:10px;line-height:1;display:none;align-items:center;justify-content:center;padding:0}
+  .bitem:hover .bx{display:flex}
+  .bitem.bover::before{content:"";position:absolute;left:0;right:0;top:-4px;height:3px;background:var(--acc);z-index:2}
+  .bitem .bx:hover{background:var(--danger)}
+  .bitem .bsel{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:10px;line-height:1;display:none;align-items:center;justify-content:center;padding:0}
+  .bitem:hover .bsel{display:flex}
+  .bitem .bsel:hover{background:var(--acc);color:#000}
+  .railempty{color:var(--mut);font-size:11px;border:1px dashed var(--line);border-radius:4px;padding:14px 8px;text-align:center}
+  #railitems{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+  .rhandle{position:fixed;top:0;bottom:0;right:calc(var(--railw) - 5px);width:14px;cursor:col-resize;z-index:8;touch-action:none}
+  .rhandle::after{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--line)}
+  .rhandle:hover::after,.rhandle.active::after{background:var(--acc)}
+  body.norail .rail,body.norail .rhandle{display:none}
+  body.norail .main{margin-right:10px}
+  .trash{position:fixed;left:0;right:var(--railw);bottom:0;height:64px;background:rgba(20,8,8,.92);border-top:2px dashed var(--danger);color:var(--danger);display:none;align-items:center;justify-content:center;font-size:14px;letter-spacing:.04em;z-index:8}
+  body.norail .trash{right:0}
+  body.tiledrag .trash{display:flex}
+  .trash.over{background:rgba(60,12,12,.95);font-weight:600}
+  body.filedrag::after{content:"Drop images: collages get split and land in the Backlog";position:fixed;inset:0;background:rgba(0,0,0,.75);border:2px dashed var(--acc);color:var(--acc);display:flex;align-items:center;justify-content:center;font-size:18px;z-index:9;pointer-events:none;text-align:center;padding:0 40px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1c1c1c;border:1px solid var(--line);border-radius:8px;padding:8px 16px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:26}
+  .toast.on{opacity:1}
+  .splitchip{position:fixed;right:calc(var(--railw) + 12px);bottom:80px;background:#1c1c1c;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;display:flex;align-items:center;gap:8px;z-index:9;box-shadow:0 4px 18px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .15s}
+  .splitchip.on{opacity:1}
+  .splitchip button{padding:4px 10px;font-size:12px}
+  .splitchip.on button{pointer-events:auto}
+  body.tiledrag .splitchip button{pointer-events:none}
+  body.norail .splitchip{right:12px}
+  @media (max-width:760px){.splitchip{right:12px}}
+  @media (max-width:760px){body:not(.norail) .splitchip{left:8px;right:calc(var(--railw) + 8px)}}
+  .selectchip{position:fixed;left:12px;bottom:80px;background:#1c1c1c;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;display:flex;align-items:center;gap:8px;z-index:9;box-shadow:0 4px 18px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .15s}
+  .selectchip.on{opacity:1}
+  .selectchip button{padding:4px 10px;font-size:12px}
+  .selectchip.on button{pointer-events:auto}
+  body.tiledrag .selectchip button{pointer-events:none}
+  /* F4+F5 coexistence: a split-confirm chip and a selection chip can both be live at
+     once (drop a collage, then keep arranging). Stack them into two rows instead of
+     letting both sit in the same bottom:80px band, where they'd overlap/interleave. */
+  body.splitpending .selectchip{bottom:130px}
+  .tghost{position:fixed;left:0;top:0;pointer-events:none;z-index:20;border-radius:4px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.6);opacity:.92}
+  .tghost img{width:100%;height:100%;object-fit:cover;display:block}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:25;display:none;align-items:center;justify-content:center;overscroll-behavior:contain}
+  .lightbox.on{display:flex}
+  .lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;display:block;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+  .lightbox button{position:absolute;background:rgba(0,0,0,.6);color:#fff;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center}
+  .lbclose{top:16px;right:16px;width:36px;height:36px;font-size:16px}
+  .lbarrow{top:50%;transform:translateY(-50%);width:44px;height:44px;font-size:22px}
+  .lbarrow.prev{left:16px}
+  .lbarrow.next{right:16px}
+  .lbcount{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:var(--mut);font-size:12px;letter-spacing:.04em}
+  .lbmeta{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);width:min(360px,84vw);display:flex;gap:8px;background:rgba(0,0,0,.6);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+  .lbmeta textarea{flex:1;resize:none;height:36px;background:transparent;border:none;color:var(--ink);font:12px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif;outline:none}
+  .lbmeta textarea::placeholder{color:var(--mut)}
+  .lbmeta input[type=date]{background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--mut);font-size:11px;padding:2px 4px;width:112px;align-self:flex-start;outline:none;color-scheme:dark}
+  .lbmeta input[type=date]:focus,.lbmeta textarea:focus{color:var(--ink);border-color:var(--mut)}
+  @media (max-width:760px){.lbarrow{width:38px;height:38px;font-size:19px}.lbarrow.prev{left:8px}.lbarrow.next{right:8px}.lbclose{top:8px;right:8px}}
+  @media (max-width:760px){.lbmeta{bottom:40px;width:min(300px,80vw)}.lbmeta input[type=date]{width:92px}}
+  @media (max-width:760px){:root{--railw:104px}.rhandle{display:none}#railitems{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}}
+  .tile.touched .tbtn,.bitem.touched .bx,.bitem.touched .bsel{display:flex}
+  .tile.locked.touched::after{opacity:1}

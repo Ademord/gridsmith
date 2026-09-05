@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+node_modules/
+.venv/
+venv/
+.playwright/
+gridsmith-layout*.json
+*.zip
+test-results/
+playwright-report/
+.env
+.env.*
+*.sqlite*
+*.db
+*.log
