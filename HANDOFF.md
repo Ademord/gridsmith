@@ -2,7 +2,7 @@
 
 Updated 6 September 2026. This release covers the browser feed planner, its portable demo and GitHub delivery. Daylog is outside this project.
 
-[Planned Pages URL](https://ademord.github.io/gridsmith/) Ã‚Â· [Source](https://github.com/Ademord/gridsmith) Ã‚Â· [v1.0.0 release](https://github.com/Ademord/gridsmith/releases/tag/v1.0.0) Ã‚Â· [Browser checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml) Ã‚Â· [Done milestone](https://github.com/Ademord/gridsmith/milestone/1)
+[Planned Pages URL](https://ademord.github.io/gridsmith/) | [Source](https://github.com/Ademord/gridsmith) | [v1.0.0 release](https://github.com/Ademord/gridsmith/releases/tag/v1.0.0) | [Browser checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml) | [Done milestone](https://github.com/Ademord/gridsmith/milestone/1)
 
 ## Current delivery status
 
@@ -15,7 +15,7 @@ Source is pushed to a private repository. GitHub Pages is blocked until the owne
 - Named drafts, native JSON backups and restoration, plus ordered ZIP exports with JPEGs, captions and dimensions/source-quality metadata.
 - Four themes, narrow layouts, storage-failure notices and a 17-step guide with pause/resume, manual takeover, contextual help and explicit import/download actions.
 - A standalone HTML build, pinned dependencies, browser regression tests, CI, a Pages workflow, screenshots and setup/update/recovery documentation.
-- Eighteen explicitly approved, previously unposted generated sample images at 300 Ãƒâ€” 400, with metadata removed. Three abstract cards represent fictional posted references. Actual posted photos and saved personal workspaces are excluded.
+- Eighteen explicitly approved, previously unposted generated sample images at 300 x 400, with metadata removed. Three abstract cards represent fictional posted references. Actual posted photos and saved personal workspaces are excluded.
 
 ## Release evidence and maintenance
 
