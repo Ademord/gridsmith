@@ -50,7 +50,7 @@
     if (!source) throw new Error('Image ' + id + ' is missing');
     blob = await exportJPEG(await exportFetch(source));
     var size = await exportImageSize(blob);
-    quality = quality || (entry && entry.locked ? 'screenshot-preview' : entry ? 'embedded-preview' : 'saved-image');
+    quality = entry && entry.sample === true ? 'demo-sample-preview' : quality || (entry && entry.locked ? 'screenshot-preview' : entry ? 'embedded-preview' : 'saved-image');
     return {blob:blob, quality:quality, width:size.width, height:size.height};
   }
   async function exportDownload(blob, filename){
@@ -72,7 +72,7 @@
     try {
       var asset = await exportAsset(id, byId[id]);
       await exportDownload(asset.blob, exportSafeId(id) + '.jpg');
-      if (!quiet) toast(asset.quality.indexOf('preview') >= 0 ? 'Downloaded preview · ' + asset.width + ' × ' + asset.height : 'Downloaded · ' + asset.width + ' × ' + asset.height);
+      if (!quiet) toast((exportSources[id] && exportSources[id].sample === true ? 'Downloaded demo sample · ' : asset.quality.indexOf('preview') >= 0 ? 'Downloaded preview · ' : 'Downloaded · ') + asset.width + ' × ' + asset.height);
     } catch(e){ if (!quiet) toast('Download failed. Try again.'); if (quiet) throw e; }
   };
 
@@ -129,24 +129,26 @@
     exportBusy = true;
     if (button) { button.disabled = true; button.setAttribute('aria-busy','true'); }
     try {
-      var files = [], rows = [], previews = 0;
+      var files = [], rows = [], previews = 0, samples = 0;
       for (var i = 0; i < ids.length; i++) {
         var id = ids[i], meta = metadata[id], asset = await exportAsset(id,sources[id]);
         var filename = String(i+1).padStart(3,'0') + '_' + exportSafeId(id) + '.jpg';
         files.push({name:filename,blob:asset.blob});
         if (asset.quality.indexOf('preview') >= 0) previews++;
-        rows.push({position:i+1,id:id,filename:filename,status:lockedIds.indexOf(id) >= 0 ? 'posted' : 'planned',caption:meta.c || '',plannedDate:meta.d || '',width:asset.width,height:asset.height,source:asset.quality});
+        var isSample = !!(exportSources[id] && exportSources[id].sample === true), isReference = lockedIds.indexOf(id) >= 0;
+        if (isSample) samples++;
+        rows.push({position:i+1,id:id,filename:filename,status:isReference ? 'posted' : 'planned',sample:isSample,fictionalReference:isSample && isReference,caption:meta.c || '',plannedDate:meta.d || '',width:asset.width,height:asset.height,source:asset.quality});
         if (button) button.textContent = 'Preparing ' + (i+1) + ' / ' + ids.length;
       }
-      var manifest = {version:1,exportedAt:new Date().toISOString(),order:'Grid order, left to right and top to bottom; posted tiles follow planned tiles.',imageCount:rows.length,previewCount:previews,images:rows};
+      var manifest = {version:1,exportedAt:new Date().toISOString(),order:'Grid order, left to right and top to bottom; posted reference tiles follow planned tiles. Status records planner placement, not verified publication.',imageCount:rows.length,previewCount:previews,sampleCount:samples,images:rows};
       files.push({name:'manifest.json',blob:new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'})});
-      var columns = ['position','id','filename','status','caption','plannedDate','width','height','source'];
+      var columns = ['position','id','filename','status','caption','plannedDate','width','height','source','sample','fictionalReference'];
       var csv = [columns.map(exportCSV).join(',')].concat(rows.map(function(row){ return columns.map(function(key){return exportCSV(row[key]);}).join(','); })).join('\r\n');
       files.push({name:'captions.csv',blob:new Blob(['\ufeff' + csv],{type:'text/csv;charset=utf-8'})});
-      files.push({name:'README.txt',blob:new Blob(['The numbered JPEGs follow your grid from left to right, top to bottom.\nPosted reference tiles and blank spacers are included. Backlog photos are excluded.\nFor Instagram, publishing the planned images in reverse numbered order reproduces the grid. Posted reference tiles are already posted.\n\nmanifest.json records each file\'s actual dimensions and source.\noriginal-file: the available original JPEG, with its bytes preserved.\nsaved-image: a photo or blank stored in your layout, at its saved size.\nscreenshot-preview: a reference tile taken from your feed screenshot.\npreview-fallback / embedded-preview: an embedded preview; the original was unavailable.\n\nCaptions and dates are in manifest.json and captions.csv. Spreadsheet formula-like captions have a leading apostrophe in the CSV; the JSON contains the exact caption.\n'],{type:'text/plain'})});
+      files.push({name:'README.txt',blob:new Blob(['The numbered JPEGs follow your grid from left to right, top to bottom.\nPosted reference tiles and blank spacers are included. Library photos are excluded.\nFor Instagram, publishing the planned images in reverse numbered order reproduces the grid.\n\nStatus records placement in the planner, not verified publication. A fictionalReference is a demo card in the posted section; it is not a real posted photo.\nDemo samples have sample: true. Bundled demo samples are 300 × 400 pixels and export at that size, without enlargement. This demo does not include their full-size originals.\n\nmanifest.json records each file\'s actual dimensions and source.\noriginal-file: the available original image, converted to JPEG if needed; original JPEG bytes stay intact.\nsaved-image: a photo or blank stored in your layout, at its saved size.\ndemo-sample-preview: an embedded demo sample, including fictional posted references.\nscreenshot-preview: a nonsample reference tile taken from a feed screenshot.\npreview-fallback / embedded-preview: an embedded preview; no original was available for this export.\n\nCaptions and dates are in manifest.json and captions.csv. Spreadsheet formula-like captions have a leading apostrophe in the CSV; the JSON contains the exact caption.\n'],{type:'text/plain'})});
       if (button) button.textContent = 'Creating ZIP…';
       await exportDownload(await exportZip(files), 'gridsmith-posts-' + new Date().toISOString().slice(0,10) + '.zip');
-      toast('ZIP downloaded · ' + rows.length + ' images' + (previews ? ' · ' + previews + ' preview-size' : ''));
+      toast('ZIP downloaded · ' + rows.length + ' images' + (samples ? ' · ' + samples + ' demo samples' : '') + (previews ? ' · ' + previews + ' preview-size' : ''));
     } catch(e){ toast('Export failed. Your grid is unchanged; try again.'); }
     finally {
       exportBusy = false;

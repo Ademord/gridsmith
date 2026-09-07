@@ -1,14 +1,19 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { startServer, root } from '../tools/serve.mjs';
-import { launchBrowser } from '../tools/browser.mjs';
+import { launchBrowser, browserName } from '../tools/browser.mjs';
 
-let server, browser, browserVersion;
+let server, browser, browserVersion, startedAt, initialHashes, launchError;
 const evidence = [];
-const output = join(root, 'test-results');
+const output = join(root, 'test-results', browserName);
+async function testedHashes() {
+  return Object.fromEntries(await Promise.all(['demo/index.html', 'tests/planner.test.mjs', 'tools/browser.mjs'].map(async name =>
+    [name, createHash('sha256').update(await readFile(join(root, name))).digest('hex')])));
+}
 const fixture = name => join(root, 'tests', 'fixtures', name);
 const planned = page => page.locator('#grid .tile:not(.locked)');
 const library = page => page.locator('#railitems .bitem');
@@ -22,6 +27,18 @@ async function until(fn, message) {
 }
 async function count(locator, expected) { await until(async () => await locator.count() === expected, `Expected ${expected} elements; got ${await locator.count()}`); }
 async function textIncludes(locator, expected) { await until(async () => (await locator.textContent() || '').includes(expected), `Expected text: ${expected}`); }
+async function renderedImageSizes(locator, limit) {
+  return locator.evaluateAll(async (images, limit) => {
+    const inspected = limit === undefined ? images : images.slice(0, limit);
+    // Firefox rejects decode() for offscreen images still deferred by lazy
+    // loading. Request their bytes before checking dimensions; decode failures
+    // remain failures, including missing or corrupt image data.
+    inspected.forEach(image => { image.loading = 'eager'; });
+    await Promise.all(inspected.map(image => image.decode()));
+    if (inspected.some(image => !image.isConnected)) throw new Error('Image nodes changed during decoding; inspect the current rendered images.');
+    return inspected.map(image => [image.naturalWidth, image.naturalHeight]);
+  }, limit);
+}
 async function review(page, names = ['grid-4x4.png']) {
   await page.locator('#fileinput').setInputFiles(names.map(fixture));
   await page.locator('#import-review').waitFor({ state: 'visible' });
@@ -37,6 +54,23 @@ async function download(page, selector) {
   const file = await pending;
   return { name: file.suggestedFilename(), bytes: await readFile(await file.path()) };
 }
+async function assertNativePixels(page, imageSources, fixtureName, boxes) {
+  const source = 'data:image/png;base64,' + (await readFile(fixture(fixtureName))).toString('base64');
+  const comparisons = await page.evaluate(async ({source, imageSources, boxes}) => {
+    async function pixels(src, box) {
+      const image = new Image(); image.src = src; await image.decode();
+      const [x,y,width,height] = box || [0,0,image.naturalWidth,image.naturalHeight];
+      const canvas = document.createElement('canvas'); canvas.width=width; canvas.height=height;
+      const context=canvas.getContext('2d'); context.drawImage(image,x,y,width,height,0,0,width,height);
+      return context.getImageData(0,0,width,height).data;
+    }
+    return Promise.all(imageSources.map(async (src,index) => {
+      const expected=await pixels(source,boxes[index]), actual=await pixels(src);
+      return actual.length===expected.length && actual.every((value,i)=>value===expected[i]);
+    }));
+  }, {source,imageSources,boxes});
+  assert.deepEqual(comparisons, boxes.map(()=>true), 'Imported pixels must equal independently specified source regions');
+}
 async function databaseRows(page) {
   return page.evaluate(() => new Promise((resolve, reject) => {
     const request = indexedDB.open('gridsmith', 1);
@@ -46,22 +80,39 @@ async function databaseRows(page) {
 }
 async function scenario(t, run, options = {}) {
   const { standalone = false, ...browserOptions } = options;
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce', ...browserOptions });
+  // Firefox cannot emulate the mobile viewport meta tag. It still runs each
+  // narrow-viewport scenario with touch enabled; no feature case is skipped.
+  const limitations = [];
+  if (browserName === 'firefox' && browserOptions.isMobile) {
+    delete browserOptions.isMobile;
+    limitations.push('Firefox uses a narrow viewport with touch; Playwright does not support isMobile for Firefox.');
+  }
+  const contextOptions = { viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce', ...browserOptions };
+  const context = await browser.newContext(contextOptions);
   const page = await context.newPage(); page.setDefaultTimeout(15000);
   const errors = [], network = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   page.on('request', request => {
-    if (/^https?:/.test(request.url()) && request.resourceType() !== 'document') network.push(request.url());
+    if (/^https?:/.test(request.url()) && (standalone || request.resourceType() !== 'document' || request.url() !== new URL(server.url).href)) network.push(request.url());
   });
-  let passed = false;
+  let passed = false, failure, offlineEnforcement;
   try {
     let entry = server.url;
     if (standalone) {
       const portable = join(output, 'gridsmith-demo.html');
       await writeFile(portable, await readFile(join(root, 'demo', 'index.html')));
       entry = pathToFileURL(portable).href;
-      await context.setOffline(true);
+      // WebKit's Windows offline emulation rejects even a local file URL before
+      // executing the app. Deny every HTTP(S) route for the entire file session
+      // instead, including reloads; attempted network requests still fail below.
+      if (browserName === 'webkit') {
+        await context.route(/^https?:\/\//, route => route.abort('internetdisconnected'));
+        offlineEnforcement = 'All HTTP(S) routes aborted before file navigation and throughout the session; offline emulation disabled because it rejects local files in this engine.';
+      } else {
+        await context.setOffline(true);
+        offlineEnforcement = 'Browser context offline before file navigation and throughout the session.';
+      }
     }
     await page.goto(entry); await count(planned(page), 12); await count(library(page), 6);
     await run(page, context);
@@ -69,19 +120,33 @@ async function scenario(t, run, options = {}) {
     assert.deepEqual(network, [], 'The app must not request HTTP assets or remote services');
     passed = true;
   } catch (error) {
+    failure = error.message;
     const name = t.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
     await page.screenshot({ path: join(output, `${name}.png`), fullPage: true }).catch(() => {});
     throw error;
   } finally {
-    evidence.push({ test: t.name, passed, standalone, errors, network });
+    evidence.push({ test: t.name, passed, standalone, offlineEnforcement, contextOptions, limitations, failure, errors, network });
     await context.close();
   }
 }
 
-before(async () => { await mkdir(output, { recursive: true }); server = await startServer(); browser = await launchBrowser(); browserVersion = browser.version(); });
+before(async () => {
+  await mkdir(output, { recursive: true }); startedAt = new Date().toISOString(); initialHashes = await testedHashes();
+  server = await startServer();
+  try { browser = await launchBrowser(); browserVersion = browser.version(); }
+  catch (error) { launchError = error.message; throw error; }
+});
 after(async () => {
+  const engine = browser?.browserType().name() || browserName;
   if (browser) await browser.close(); if (server) await server.close();
-  await writeFile(join(output, 'results.json'), JSON.stringify({ browser: 'Chromium', browserVersion, tests: evidence }, null, 2) + '\n');
+  const finalHashes = await testedHashes();
+  const artifactStable = JSON.stringify(initialHashes) === JSON.stringify(finalHashes);
+  await writeFile(join(output, 'results.json'), JSON.stringify({ browser: engine, browserVersion, launchError, startedAt, finishedAt: new Date().toISOString(),
+    platform: process.platform, nodeVersion: process.version, initialHashes, finalHashes, artifactStable,
+    coverageLimits: ['Desktop browser engines and simulated viewports only; no real mobile devices were tested.',
+      ...(engine === 'webkit' ? ['Playwright WebKit is an engine build, not the Safari application. Safari and real-device Safari remain unverified.'] : [])],
+    tests: evidence }, null, 2) + '\n');
+  assert.equal(artifactStable, true, 'Tested files changed during this run; repeat the suite against a stable artifact');
 });
 
 test('sample workspace starts with 12 planned, 6 library and 3 posted cards', t => scenario(t, async page => {
@@ -89,10 +154,8 @@ test('sample workspace starts with 12 planned, 6 library and 3 posted cards', t 
   assert.equal(await page.title(), 'Gridsmith | Feed planner');
   assert.equal(await page.locator('#undo').isDisabled(), true);
   assert.equal(await page.locator('#redo').isDisabled(), true);
-  const decoded = await page.locator('#grid img, #railitems img').evaluateAll(async images => {
-    await Promise.all(images.map(image => image.decode())); return images.every(image => image.naturalWidth === 300 && image.naturalHeight === 400);
-  });
-  assert.equal(decoded, true);
+  const sizes = await renderedImageSizes(page.locator('#grid img, #railitems img'));
+  assert.deepEqual(sizes, Array.from({ length: 21 }, () => [300, 400]));
 }));
 
 for (const [name, total] of [['grid-4x4.png', 16], ['grid-6x5.png', 30]]) {
@@ -129,10 +192,10 @@ test('manual correction requires apply and imports selected native-size crops', 
   assert.equal(await page.locator('.import-confirm').isDisabled(), true);
   await page.locator('.import-rows').fill('2'); await page.getByRole('button', { name: 'Apply grid', exact: true }).click();
   await page.locator('.import-tile input').nth(1).uncheck(); await confirm(page, 9);
-  const dimensions = await library(page).locator('img').evaluateAll(async images => {
-    await Promise.all(images.slice(0, 3).map(image => image.decode())); return images.slice(0, 3).map(image => [image.naturalWidth, image.naturalHeight]);
-  });
+  const dimensions = await renderedImageSizes(library(page).locator('img'), 3);
   assert.deepEqual(dimensions, [[203, 203], [203, 203], [203, 203]]);
+  const sources=await library(page).locator('img').evaluateAll(images=>images.slice(0,3).map(image=>image.src));
+  await assertNativePixels(page,sources,'grid-4x4.png',[[0,0,203,203],[0,206,203,203],[206,206,203,203]]);
 }));
 
 test('original mode imports one image and preserves its exact PNG bytes', t => scenario(t, async page => {
@@ -142,8 +205,7 @@ test('original mode imports one image and preserves its exact PNG bytes', t => s
   const rows = await databaseRows(page); assert.equal(rows.length, 1);
   assert.deepEqual(Buffer.from(rows[0].src.split(',')[1], 'base64'), await readFile(fixture('grid-6x5.png')));
   await page.reload(); await count(library(page), 7);
-  const size = await library(page).first().locator('img').evaluate(async image => { await image.decode(); return [image.naturalWidth, image.naturalHeight]; });
-  assert.deepEqual(size, [615, 512]);
+  assert.deepEqual(await renderedImageSizes(library(page).first().locator('img')), [[615, 512]]);
 }));
 
 test('16 and 30 photos import as one durable batch with undo and redo', t => scenario(t, async page => {
@@ -156,10 +218,13 @@ test('16 and 30 photos import as one durable batch with undo and redo', t => sce
   await until(async () => (await databaseRows(page)).length === 46, 'Redo must restore all imported image records');
   await page.reload(); await count(library(page), 52);
   assert.deepEqual(await libraryIds(page), imported);
-  const sizes = await library(page).locator('img').evaluateAll(async images => {
-    await Promise.all(images.slice(0, 46).map(image => image.decode())); return images.slice(0, 46).map(image => [image.naturalWidth, image.naturalHeight]);
-  });
+  const sizes = await renderedImageSizes(library(page).locator('img'), 46);
   assert.equal(sizes.every(([width, height]) => width === 100 && height === 100), true);
+  const sources = await library(page).locator('img').evaluateAll(images => images.slice(0, 46).map(image => image.src));
+  const gridBoxes = (rows, columns) => Array.from({ length: rows * columns }, (_, index) =>
+    [(index % columns) * 103, Math.floor(index / columns) * 103, 100, 100]);
+  await assertNativePixels(page, sources.slice(0, 16), 'grid-4x4.png', gridBoxes(4, 4));
+  await assertNativePixels(page, sources.slice(16), 'grid-6x5.png', gridBoxes(5, 6));
 }));
 
 test('draft save, load, delete and undo restore the named arrangement', t => scenario(t, async page => {
@@ -410,12 +475,30 @@ test('copied standalone HTML works offline through the guide, import, reload, ba
   assert.equal(rows.length, 1);
   await page.reload(); await count(library(page), 7);
   assert.equal((await databaseRows(page))[0].src, rows[0].src);
+  await page.locator('#drafts-toggle').click(); await page.locator('#draft-name').fill('Offline arrangement');
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click(); await page.keyboard.press('Escape');
   const backup = await download(page, '#savelayout');
   const saved = JSON.parse(backup.bytes);
   assert.equal(saved.added.length, 1);
   assert.deepEqual(saved.order.slice(0, 2), [initial[1], initial[0]]);
+  // Restore into an empty store so a no-op restore cannot pass this offline case.
+  await page.evaluate(async () => {
+    localStorage.clear();
+    await new Promise((resolve,reject)=>{const request=indexedDB.open('gridsmith',1);request.onsuccess=()=>{const db=request.result;const tx=db.transaction('added','readwrite');tx.objectStore('added').clear();tx.oncomplete=()=>{db.close();resolve();};tx.onabort=()=>reject(tx.error);};request.onerror=()=>reject(request.error);});
+  });
+  await page.reload(); await count(library(page),6); assert.deepEqual(await databaseRows(page),[]);
   await page.locator('#fileinput').setInputFiles({ name: backup.name, mimeType: 'application/json', buffer: backup.bytes });
   await count(library(page), 7);
+  await until(async()=>(await databaseRows(page)).length===1,'Offline restoration must recreate the image record');
+  assert.deepEqual(await order(page),saved.order);
+  assert.equal((await databaseRows(page))[0].src,saved.added[0].src);
+  assert.deepEqual((await state(page)).meta, saved.meta);
+  assert.deepEqual((await state(page)).drafts, saved.drafts);
+  await page.reload(); await count(library(page),7);
+  assert.deepEqual(await order(page),saved.order);
+  assert.deepEqual((await state(page)).meta,saved.meta);
+  assert.deepEqual((await state(page)).drafts,saved.drafts);
+  assert.equal((await databaseRows(page))[0].src, rows[0].src, 'Restored image bytes must survive reload');
   const archive = await download(page, '#exportposts');
   const files = unzipStored(archive.bytes);
   assert.equal(JSON.parse(files.get('manifest.json')).imageCount, 15);

@@ -1,14 +1,18 @@
 {
   "name": "gridsmith",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "A browser-local feed planner with a synthetic public demo.",
+  "description": "A browser-local feed planner with reviewed collage imports and an approved-image demo.",
   "type": "module",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "serve": "node tools/serve.mjs",
-    "test": "node --test --test-concurrency=1 tests/planner.test.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
     "screenshots": "node tools/screenshots.mjs"
   },
-  "devDependencies": { "playwright": "1.62.1" }
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
 }

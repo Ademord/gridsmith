@@ -101,8 +101,10 @@
     var section=importElement('section','import-file');file.node=section;
     var head=importElement('div','import-file-head'),title=importElement('div');
     title.appendChild(importElement('h3','',file.name));
-    var summary=file.detected.length>1?file.detected.length+' photos detected \u00b7 Review each crop':'One image detected \u00b7 Choose Manual grid to split it';
+    var summary=file.detected.length>1?file.detected.length+' photo crops suggested \u00b7 Review each crop':'No reliable photo grid detected \u00b7 Original is selected';
     title.appendChild(importElement('p','',summary));head.appendChild(title);section.appendChild(head);
+    if(file.unresolvedLayout)title.appendChild(importElement('p','import-layout-note','This layout could not be separated reliably. Keep Original as one photo, or import the separate photos. Manual grid only supports evenly spaced rows and columns.'));
+    else if(file.irregularLayout)title.appendChild(importElement('p','import-layout-note','This layout has unequal crops or an incomplete row. Check the edges of every crop. Choose Original as one photo if any crop is wrong.'));
     if(file.partialLastRow||file.partialLastColumn)title.appendChild(importElement('p','import-partial-note','The screenshot cuts off the '+(file.partialLastRow&&file.partialLastColumn?'bottom row and right column':file.partialLastRow?'bottom row':'right column')+'. Deselect any incomplete photos you do not want.'));
     var modeLabel=importElement('label','import-mode','Import as');
     var mode=document.createElement('select');mode.setAttribute('aria-label','Import mode for '+file.name);
@@ -111,7 +113,7 @@
     var fileTools=importElement('div','import-file-tools'),adjust=importElement('button','import-adjust-grid','Adjust grid');adjust.type='button';
     fileTools.appendChild(modeLabel);fileTools.appendChild(adjust);section.appendChild(fileTools);
     var manual=importElement('div','import-manual');manual.hidden=true;
-    manual.innerHTML='<p>Set the grid to match your collage. Gutter is the gap between photos, in source pixels.</p><div class="import-grid-fields"><label>Rows<input class="import-rows" type="number" min="1" max="12" step="1" inputmode="numeric"></label><label>Columns<input class="import-columns" type="number" min="1" max="12" step="1" inputmode="numeric"></label><label>Gutter (px)<input class="import-gutter" type="number" min="0" max="500" step="1" inputmode="numeric" value="0"></label><button type="button" class="import-apply-grid">Apply grid</button></div><p class="import-grid-error" role="alert" hidden></p><canvas class="import-grid-preview" role="img"></canvas><p class="import-grid-note">The preview and photos below show the applied grid.</p>';
+    manual.innerHTML='<p>Manual grid makes equal-sized crops across the whole image. It cannot follow unequal tiles or remove an outer frame. Gutter is the gap between photos, in source pixels. For other layouts, choose Original as one photo or import the separate photos.</p><div class="import-grid-fields"><label>Rows<input class="import-rows" type="number" min="1" max="12" step="1" inputmode="numeric"></label><label>Columns<input class="import-columns" type="number" min="1" max="12" step="1" inputmode="numeric"></label><label>Gutter (px)<input class="import-gutter" type="number" min="0" max="500" step="1" inputmode="numeric" value="0"></label><button type="button" class="import-apply-grid">Apply grid</button></div><p class="import-grid-error" role="alert" hidden></p><canvas class="import-grid-preview" role="img"></canvas><p class="import-grid-note">The preview and photos below show the applied grid.</p>';
     manual.querySelector('.import-rows').value=file.rows;manual.querySelector('.import-columns').value=file.columns;
     section.appendChild(manual);section.appendChild(importElement('div','import-tiles'));
     mode.addEventListener('change',function(){
@@ -214,6 +216,7 @@
               var staged={name:file.name,src:src,image:img,width:width,height:height,rows:Math.max(1,Math.min(12,Math.floor(height/8),boxes.length===1?3:Math.round(rows))),columns:Math.max(1,Math.min(12,Math.floor(width/8),boxes.length===1?3:Math.round(columns))),mode:boxes.length>1?'detected':'original',manual:[]};
               staged.detected=makeImportCandidates(staged,boxes);staged.original=makeImportCandidates(staged,[[0,0,width,height]]);
               staged.partialLastRow=!!det.partialLastRow;staged.partialLastColumn=!!det.partialLastColumn;
+              staged.irregularLayout=!!det.irregularLayout;staged.unresolvedLayout=!!det.unresolvedLayout;
               job.files.push(staged);job.pixels+=width*height;renderImportFile(job,staged);resolve();
             }catch(error){reject(error);}
           };img.src=src;

@@ -2,7 +2,7 @@
 
 A feed planner that keeps your photos and layouts in your browser. Arrange a grid, review crops from a collage, save named drafts, and download your posts in order. Dates are planning notes; Gridsmith does not publish to Instagram.
 
-[GitHub Pages demo (publication pending)](https://ademord.github.io/gridsmith/) | [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.0.0/gridsmith-demo.html) | [Source](https://github.com/Ademord/gridsmith) | [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
+[GitHub Pages demo (publication pending)](https://ademord.github.io/gridsmith/) | [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.1.0/gridsmith-demo.html) | [Source](https://github.com/Ademord/gridsmith) | [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
 
 GitHub Pages publication is waiting for approval to make this reviewed repository public. The offline demo and local preview work independently of hosting.
 
@@ -10,7 +10,7 @@ GitHub Pages publication is waiting for approval to make this reviewed repositor
 
 The demo starts with **12 planned images, six library images and three posted references**. The first 18 images are owner-approved, previously unposted generated images, published as 300 x 400 PNGs with metadata removed. The three abstract posted references are fictional. Actual posted photos and saved personal workspaces are excluded.
 
-Select **Start tour** to explore the planner, or arrange the samples yourself. The [demo guide](DEMO-GUIDE.md) covers both paths.
+Select **Try a grid import** to review a built-in collage, **Start tour** for the walkthrough, or arrange the samples yourself. The [demo guide](DEMO-GUIDE.md) covers both paths.
 
 ## Try it locally
 
@@ -25,7 +25,7 @@ Visit the localhost address printed by the server. The app has no account, backe
 ## What you can do
 
 - Drag photos into order, use Alt + arrow keys, or select several posts together.
-- Review detected crops before importing. Select only the photos you want, correct rows, columns and gutters, or keep the original image intact.
+- Review detected crops before importing. Flat gutters can separate unequal tiles, mixed rows, wide gaps and partial rows. Select the photos you want, inspect their edges, correct an equal grid, or keep the original intact. Ambiguous layouts need review; detection is not a guarantee.
 - Add captions and dates, keep up to ten named drafts, and undo or redo changes.
 - Switch among Charcoal, Violet, Amber and Light themes; preview the profile grid.
 - Save a JSON backup including imported photos. Add the backup through **Add photos** to restore it.
@@ -46,14 +46,24 @@ python -m venv .venv
 # Activate .venv using your platform's normal command.
 python -m pip install -r requirements.txt
 npm ci
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 python tools/build.py --check
 npm test
 ```
 
-On Linux, `npx playwright install --with-deps chromium` also installs system browser dependencies. The exact Pillow and Playwright versions are pinned. `npm test` starts and stops its own loopback server and uses fresh browser contexts. It writes JSON evidence and failure screenshots under ignored `test-results/`.
+On Linux, `npx playwright install --with-deps chromium firefox webkit` also installs system browser dependencies. The exact Pillow and Playwright versions are pinned. `npm test` starts and stops its own loopback server and uses fresh browser contexts. It writes JSON evidence and failure screenshots under ignored `test-results/`.
 
-The checks exercise 16- and 30-photo review, selection and cancellation, corrected crops, original bytes, import persistence and undo/redo, drafts, backup restore, ZIP contents, all themes, keyboard controls, 390/320-pixel layouts, storage failure, and the complete guided demo with manual takeover. Each case rejects browser errors and HTTP asset/service requests. They are Chromium checks, not a claim of exhaustive cross-browser or device coverage.
+The tests exercise known 16- and 30-photo grids, independently defined irregular crops, native pixel comparisons, single-image negatives, cancellation, original bytes, import persistence, backup restoration, retryable Undo/Redo under storage failure, drafts, ZIP contents, all themes, keyboard controls, narrow layouts and the guided/manual demos. Release canaries exercise changed images, stale inventories, secret patterns, history, symlinks and misleading approval records.
+
+Run the browser suite once per engine (set environment variables using your shell):
+
+```sh
+PLAYWRIGHT_BROWSER=chromium npm test
+PLAYWRIGHT_BROWSER=firefox npm test
+PLAYWRIGHT_BROWSER=webkit npm test
+```
+
+PowerShell uses `$env:PLAYWRIGHT_BROWSER = 'firefox'` followed by `npm test`. CI runs all three engines. These are desktop engine and simulated-viewport checks, not tests on physical phones or Safari itself. Firefox uses narrow viewports with touch because its driver does not support mobile emulation. Copied-file tests deny network access; WebKit on Windows uses request blocking because its offline-emulation flag rejects local file navigation. Evidence records the method and actual engine version.
 
 After editing `planner_src/`, regenerate the standalone page and fixtures:
 
@@ -85,8 +95,8 @@ If storage is blocked or full, **Unsaved changes** appears in the header and not
 
 ## Continuous integration and hosting
 
-[Browser checks](.github/workflows/ci.yml) verifies the committed generated page **before** rebuilding and runs the real Chromium suite on Linux. The separate [Publish sample demo](.github/workflows/pages.yml) workflow is manually dispatched. It repeats those checks before uploading only `demo/` to GitHub Pages. Configure repository Pages to use GitHub Actions and, where required, add approval protection to the `github-pages` environment before dispatching it.
+[Browser and release checks](.github/workflows/ci.yml) verify the exact inventory, image policy, reachable history and generated page, and run Chromium, Firefox and WebKit cases. The [Publish sample demo](.github/workflows/pages.yml) workflow reuses those checks and uploads only `demo/`. GitHub Pages is still awaiting approval for public repository visibility.
 
-The source snapshot and generated assets are inventoried in [PUBLIC-CONTENTS.json](PUBLIC-CONTENTS.json).
+The exact source snapshot and assets are inventoried in [PUBLIC-CONTENTS.json](PUBLIC-CONTENTS.json). Both inventory and verification tools are in this repository. See the [version 1.1 review record](docs/VALIDATION.md), [release instructions](docs/RELEASE.md) and [review rules](docs/GOVERNANCE.md); refreshing a hash is not approval.
 
-See [the release handoff](HANDOFF.md) for the implemented scope and release entry points, and [tomorrow's follow-ups](TODO.md) for optional further work.
+See [the handoff](HANDOFF.md) for current scope and [remaining work](TODO.md) for open tasks.

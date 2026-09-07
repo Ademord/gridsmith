@@ -6,7 +6,7 @@
   var qa = function (s) { return Array.from(document.querySelectorAll(s)); };
   var visible = function (el) { return !!(el && el.getClientRects().length && !el.closest('[hidden]')); };
   var bundled = JSON.parse(q('#bundled').textContent);
-  var sampleIds = new Set(bundled.filter(function (item) { return !item.locked; }).map(function (item) { return item.id; }));
+  var sampleIds = new Set(bundled.filter(function (item) { return item.sample === true && !item.locked; }).map(function (item) { return item.id; }));
   var fixture = null;
   try { fixture = JSON.parse(q('#gridsmith-guide-fixture').textContent); } catch (e) {}
   var state = { mode: 'idle', index: -1, epoch: 0, timer: null, speed: 4500, busy: false, sample: null, changed: false, note: '', snapshot: '' };
@@ -27,7 +27,7 @@
   function closeGuideImport() { closeCrop(); if (q('#import-review[open]')) { guideImport(); click('#import-review .import-cancel'); } }
   async function stageGrid() {
     noModal();
-    if (!fixture || !/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(fixture.src || '')) throw Error('The sample grid is unavailable. Add your own image manually or use Skip step.');
+    if (!fixture || !/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(fixture.src || '')) throw Error('The sample grid is unavailable. Use Add photos to review your own image.');
     var binary = atob(fixture.src.split(',')[1]);
     var bytes = Uint8Array.from(binary, function (c) { return c.charCodeAt(0); });
     var transfer = new DataTransfer(); transfer.items.add(new File([bytes], fixture.name, { type: 'image/png' }));
@@ -35,7 +35,7 @@
     q('#collageinput').dispatchEvent(new Event('change', { bubbles: true }));
   }
   var steps = [
-    { title: 'Your feed and library', target: '.grid-meta', text: 'The starting sample has 12 planned cards, 6 in the Library and 3 posted. Your current layout may differ. The guide keeps existing photos and captions.', action: function () { noModal(); chooseSample(); if (document.body.classList.contains('preview-mode')) click('#planview'); } },
+    { title: 'Your feed and library', target: '.grid-meta', text: 'The starting demo has 12 planned cards, 6 in the Library and 3 fictional posted references. Samples are 300 × 400 pixels. Your current layout may differ; the guide keeps existing photos and captions.', action: function () { noModal(); chooseSample(); if (document.body.classList.contains('preview-mode')) click('#planview'); } },
     { title: 'Move a sample card', target: function () { return state.sample ? '#grid .tile[data-id="' + state.sample + '"]' : '#grid'; }, text: 'The guide moves one demo photo with the real Alt + Right Arrow shortcut. Drag a photo to insert or swap it. Undo remains available.', action: function () { if (qa('.tile.selected,.bitem.selected').length) throw Error('You have a selection. Clear it when ready or skip this step; the guide will not replace it.'); var node = sample(); node.focus(); node.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true })); } },
     { title: 'Edit a post', target: '.lbmeta', text: 'The post editor holds its caption and planned date. Dates are planning notes; this app does not schedule Instagram posts.', action: function () { sample().click(); } },
     { title: 'Caption and planned date', target: '.lbmeta', text: 'The guide fills only blank fields on this demo photo. Existing captions and dates are preserved. Edits save through the normal editor.', action: function () { var node = sample(); if (!visible(q('.lightbox.on')) || !q('.lightbox.on img').alt.endsWith(node.dataset.id)) throw Error('A different post is open. Its fields were preserved. Use Skip step or reopen the sample card.'); if (!q('.lbcaption').value) field('.lbcaption', 'Sample post: morning in town.'); if (!q('.lbdate').value) field('.lbdate', '2026-09-12'); }, manual: true },
@@ -50,7 +50,7 @@
     { title: 'Save a draft', target: '#draft-name', text: 'Name the current layout and select Save draft. Drafts retain the order, captions and dates. Saving here stays in this browser; no download starts.', action: function () { closeGuideImport(); noModal(); click('#drafts-toggle'); }, manual: true },
     { title: 'Try all four themes', target: '#planner-theme', text: 'Choose Charcoal, Violet, Amber or Light. Theme is a separate browser preference; it does not change the photos or draft contents.', action: function () { var draft = q('#draft-panel[open], #draft-dialog[open]'); if (draft) draft.querySelector('.panel-close').click(); else qa('dialog[open]').forEach(function (d) { if (d.querySelector('#draft-name')) d.querySelector('.panel-close').click(); }); noModal(); q('.more-menu').open = true; }, manual: true },
     { title: 'Save a portable layout', target: '#savelayout', text: 'Save layout downloads a backup with your arrangement, captions and imported photos. Select it yourself when ready. The guide does not start downloads.', action: function () { q('.more-menu').open = false; }, manual: true },
-    { title: 'Export posts in feed order', target: '#exportposts', text: 'Export posts downloads a ZIP in feed order, with captions and source details. Select the real button yourself when ready; the guide never starts an export.', action: function () {}, manual: true },
+    { title: 'Export posts in feed order', target: '#exportposts', text: 'Export posts downloads a ZIP in feed order, with captions and actual dimensions. Demo samples export at 300 × 400, without enlargement; the three posted references are fictional. Select the real button when ready.', action: function () {}, manual: true },
     { title: 'Keep working', target: '#grid', text: 'The tour is complete. Photos, captions, drafts and confirmed imports remain in place. Restart tour resets only the guide; it never uses Reset layout.', action: function () { noModal(); } },
   ];
   function selector(step) { return typeof step.target === 'function' ? step.target() : step.target; }
@@ -177,7 +177,7 @@
     button.addEventListener('click', function (e) { e.stopPropagation(); if (openBeforePointer || (e.detail === 0 && hintButton === button && hint.matches(':popover-open'))) closeHint(); else showHint(button); openBeforePointer = false; });
   }
   function helpAll() {
-    addHelp('.grid-meta #grid-context', 'Arrange photos by dragging, or focus one and use Alt + arrow keys. Posted cards stay at the end.');
+    addHelp('.grid-meta #grid-context', 'Arrange photos by dragging, or focus one and use Alt + arrow keys. Posted cards stay at the end. The demo’s three posted references are fictional; bundled samples export at 300 × 400 pixels.');
     addHelp('.library-heading h2', 'Library photos are outside the feed. Click to add one at the top or drag it into position.');
     addHelp('#import-review-title', 'Review crops before importing. Selection, full crop previews and Manual grid change only the pending import.');
     addHelp('.lbcaption', 'Captions save as you type. Planned dates are notes and do not schedule Instagram posts.');
@@ -185,8 +185,8 @@
     addHelp('#planner-theme-label', 'Charcoal, Violet, Amber and Light change the interface only. Theme stays separate from layout backups.');
   }
   function setup() {
-    dock = document.createElement('section'); dock.className = 'guide-dock'; dock.setAttribute('aria-label', 'Guided demo');
-    dock.innerHTML = '<div><strong>Try the sample</strong><span>The tour edits a sample card. Imports and downloads wait for you.</span></div><button id="guide-start" class="btn-primary">Start tour</button>';
+    dock = document.createElement('section'); dock.className = 'guide-dock'; dock.setAttribute('aria-label', 'Demo options');
+    dock.innerHTML = '<div class="guide-dock-copy"><strong>Try the demo samples</strong><span id="guide-start-info">Review a generated grid or take the tour. You confirm imports and downloads.</span><span id="guide-manual-status" role="status" hidden></span></div><div class="guide-dock-actions"><button id="guide-try-import" type="button" aria-describedby="guide-start-info">Try a grid import</button><button id="guide-start" type="button" class="btn-primary" aria-describedby="guide-start-info">Start tour</button></div>';
     shade = document.createElement('div'); shade.className = 'guide-shade'; shade.setAttribute('popover', 'manual'); shade.setAttribute('aria-hidden', 'true');
     card = document.createElement('section'); card.id = 'guide-card'; card.className = 'guide-card'; card.setAttribute('popover', 'manual'); card.setAttribute('aria-label', 'Gridsmith guided demo');
     card.innerHTML = '<div class="guide-header"><span id="guide-state"></span><span id="guide-count"></span></div><progress id="guide-progress" max="' + steps.length + '" aria-label="Tour progress"></progress><h2 id="guide-title"></h2><p id="guide-description" aria-live="polite"></p><p id="guide-note" role="status" hidden></p><div class="guide-controls"><button id="guide-next" class="btn-primary">Next step</button><button id="guide-pause">Pause tour</button><button id="guide-end">End tour</button></div><div class="guide-options"><label>Speed <select id="guide-speed" aria-label="Tour speed"><option value="2000">Fast · 2s</option><option value="4500" selected>Normal · 4.5s</option><option value="8000">Slow · 8s</option></select></label><button id="guide-skip">Skip step</button><button id="guide-restart">Restart tour</button></div><p id="guide-instruction"></p>';
@@ -199,6 +199,13 @@
     details.onclick = function () { if (hintButton === details && hint.matches(':popover-open')) closeHint(); else { details.dataset.guideHelp = steps[state.index].text; showHint(details); } };
     card.addEventListener('click', function (e) { e.stopPropagation(); });
     q('#guide-start').onclick = start; q('#guide-next').onclick = function () { advance(); }; q('#guide-skip').onclick = function () { advance(true); }; q('#guide-end').onclick = end; q('#guide-restart').onclick = start;
+    q('#guide-try-import').onclick = async function () {
+      if (active()) return;
+      closeHint();
+      var status = q('#guide-manual-status'); status.hidden = true; status.textContent = '';
+      try { await stageGrid(); }
+      catch (error) { status.textContent = error.message; status.hidden = false; }
+    };
     q('#guide-pause').onclick = function () {
       if (state.mode !== 'paused') return pause();
       if (state.snapshot !== fingerprint()) { state.note = 'Your view or inputs changed. They are preserved. Use Next step to continue explicitly, Skip step, or End tour.'; render(); return; }

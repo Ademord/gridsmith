@@ -64,7 +64,7 @@ def build(check=False):
         if hashlib.sha256(payload).hexdigest() != entry['sha256']:
             raise ValueError('Approved sample hash mismatch')
         payloads.append(payload)
-    manifest = [{'id':f'sample_{n:02}', 'src':'data:image/png;base64,'+base64.b64encode(payloads[n-1] if n<=18 else canonical_png(f'sample_{n:02}',sample(n))).decode(), 'locked': n>18} for n in range(1,22)]
+    manifest = [{'id':f'sample_{n:02}', 'src':'data:image/png;base64,'+base64.b64encode(payloads[n-1] if n<=18 else canonical_png(f'sample_{n:02}',sample(n))).decode(), 'locked': n>18, 'sample': True} for n in range(1,22)]
     state = {'order':[m['id'] for m in manifest[:12]], 'backlog':[m['id'] for m in manifest[12:18]], 'cols':3,
              'railw':0,'railh':False,'meta':{},'drafts':[]}
     app = (src / 'app.js').read_text(encoding='utf-8')

@@ -109,51 +109,63 @@
     redoStack = [];
     updateUndoUI();
   }
-  function applySnapshot(snap){
-    dismissSplitChip(); // undo/redo can invalidate the ids/merge a live split chip refers to
-    lbMetaUndoId = null;
-    Object.keys(byId).forEach(function(id){
-      if (isUser(id) && !(id in snap.added)){
-        delete byId[id];
-        if (db) { try { db.transaction('added','readwrite').objectStore('added').delete(id); } catch(e){} }
+  var snapshotBusy = false;
+  async function applySnapshot(snap){
+    var progress=document.createElement('dialog');progress.className='panel-dialog';
+    progress.setAttribute('aria-label','Saving history change');
+    progress.innerHTML='<div class="panel-body"><p role="status">Saving your change...</p></div>';
+    progress.addEventListener('cancel',function(event){event.preventDefault();});
+    document.body.appendChild(progress);openPanelModal(progress);
+    try {
+      await imageStorageReady;
+      var next=Object.assign({},state,{order:snap.order.slice(),backlog:snap.backlog.slice(),meta:sanitizeMeta(snap.meta),drafts:sanitizeDrafts(snap.drafts)});
+      var removed=Object.keys(byId).filter(function(id){return isUser(id)&&!(id in snap.added);});
+      var changed=Object.keys(snap.added).filter(function(id){return byId[id]!==snap.added[id];});
+      if(removed.length||changed.length){
+        if(!db)throw new Error('Photo storage is unavailable. Your current layout was kept. Try again.');
+        var previous=localStorage.getItem(LS),wrote=false;
+        await new Promise(function(resolve,reject){
+          var tx,error;
+          function aborted(){
+            if(wrote){try{previous===null?localStorage.removeItem(LS):localStorage.setItem(LS,previous);}catch(failure){save.failed=true;saveNotice(false);reject(new Error('The browser blocked history recovery. Use Save layout before reloading.'));return;}}
+            reject(error||new Error('Photo storage is full or blocked. Your current layout was kept. Try again.'));
+          }
+          function stop(failure){error=failure;try{tx.abort();}catch(ignore){}}
+          try{
+            tx=db.transaction('added','readwrite');tx.onabort=aborted;tx.oncomplete=resolve;
+            tx.onerror=function(){error=new Error('Photo storage is full or blocked. Your current layout was kept. Try again.');};
+            var store=tx.objectStore('added'),pending=removed.length+changed.length;
+            function wroteImage(){if(--pending)return;try{localStorage.setItem(LS,JSON.stringify(next));wrote=true;}catch(failure){stop(new Error('Layout storage is full or blocked. Your current layout was kept. Try again.'));}}
+            removed.forEach(function(id){store.delete(id).onsuccess=wroteImage;});
+            changed.forEach(function(id){store.put({id:id,src:snap.added[id]}).onsuccess=wroteImage;});
+          }catch(failure){if(tx)stop(failure);else aborted();}
+        });
+      } else {
+        try{localStorage.setItem(LS,JSON.stringify(next));}
+        catch(failure){throw new Error('Layout storage is full or blocked. Your current layout was kept. Try again.');}
       }
-    });
-    Object.keys(snap.added).forEach(function(id){
-      if (byId[id] !== snap.added[id]){
-        byId[id] = snap.added[id];
-        if (db) { try { db.transaction('added','readwrite').objectStore('added').put({id: id, src: snap.added[id]}); } catch(e){} }
-      }
-    });
-    state.order = snap.order.slice();
-    state.backlog = snap.backlog.slice();
-    state.meta = sanitizeMeta(snap.meta);
-    state.drafts = sanitizeDrafts(snap.drafts);
-    save(); render();
+      dismissSplitChip();lbMetaUndoId=null;
+      removed.forEach(function(id){delete byId[id];});
+      changed.forEach(function(id){byId[id]=snap.added[id];});
+      state=next;save.failed=false;saveNotice(true);render();
+    } finally {progress.close();progress.remove();}
   }
   function updateUndoUI(){
-    document.getElementById('undo').disabled = !undoStack.length;
-    var redo = document.getElementById('redo'); if (redo) redo.disabled = !redoStack.length;
+    document.getElementById('undo').disabled = snapshotBusy || !undoStack.length;
+    var redo = document.getElementById('redo'); if (redo) redo.disabled = snapshotBusy || !redoStack.length;
   }
-  function doUndo(){
-    if (!undoStack.length) return;
-    var cur = snapshot();
-    var prev = undoStack.pop();
-    redoStack.push(cur);
-    if (redoStack.length > UNDO_MAX) redoStack.shift();
-    applySnapshot(prev);
-    updateUndoUI();
-    toast('Undone');
+  async function changeHistory(from,to,message){
+    if(snapshotBusy||!from.length)return;
+    snapshotBusy=true;updateUndoUI();
+    try{
+      var current=snapshot(),target=from[from.length-1];
+      await applySnapshot(target);
+      from.pop();to.push(current);if(to.length>UNDO_MAX)to.shift();toast(message);
+    }catch(error){toast(error.message||'This change could not be saved. Your current layout was kept. Try again.');}
+    finally{snapshotBusy=false;updateUndoUI();}
   }
-  function doRedo(){
-    if (!redoStack.length) return;
-    var cur = snapshot();
-    var next = redoStack.pop();
-    undoStack.push(cur);
-    if (undoStack.length > UNDO_MAX) undoStack.shift();
-    applySnapshot(next);
-    updateUndoUI();
-    toast('Redone');
-  }
+  function doUndo(){return changeHistory(undoStack,redoStack,'Undone');}
+  function doRedo(){return changeHistory(redoStack,undoStack,'Redone');}
 
   // File exports use native browser downloads, never host publication services.
   function getDls(){ return Promise.resolve(null); }
@@ -1551,22 +1563,75 @@
       if (asText) reader.readAsText(file); else reader.readAsDataURL(file);
     });
   }
-  function importLayout(j){
+  async function importLayout(j){
     if (!j || !Array.isArray(j.order) || (j.backlog && !Array.isArray(j.backlog)) || (j.added && !Array.isArray(j.added))) throw new Error('Choose a Gridsmith layout JSON file.');
-    var added = (j.added || []);
-    if (added.some(function(r){ return !validAdded(r); })) throw new Error('This layout contains an invalid image. Nothing was changed.');
-    var draftState = sanitizeDrafts(j.drafts), metadata = sanitizeMeta(j.meta);
-    dismissSplitChip(); pushUndo();
-    added.forEach(function(r){ byId[r.id] = r.src;
-      if (db) { try { db.transaction('added','readwrite').objectStore('added').put({id:r.id, src:r.src}); } catch(e){} }
-    });
-    var seen = Object.create(null);
-    function available(id){ if (!byId[id] || seen[id]) return false; seen[id] = true; return true; }
-    state = { order: cleanIds(j.order).filter(available), backlog: cleanIds(j.backlog || j.hidden).filter(available),
-      cols: [3,4,5].indexOf(j.cols) >= 0 ? j.cols : 3,
-      railw: typeof j.railw === 'number' && j.railw >= 84 ? j.railw : 0, railh: !!j.railh,
-      meta: metadata, drafts: draftState };
-    sweepOrphans(); clearSelection(); save(); applyRail(); render(); toast('Layout restored');
+    var added = j.added || [], seenAdded = Object.create(null);
+    if (added.length > 5000 || added.some(function(row){
+      if (!validAdded(row) || seenAdded[row.id]) return true;
+      seenAdded[row.id] = true; return false;
+    })) throw new Error('This layout contains invalid or duplicate images. Nothing was changed.');
+    // A modal prevents edits from racing a restore while the image store opens.
+    var progress = document.createElement('dialog'); progress.className = 'panel-dialog';
+    progress.setAttribute('aria-label','Restoring layout');
+    progress.innerHTML = '<div class="panel-body"><p role="status">Checking and restoring your layout...</p></div>';
+    progress.addEventListener('cancel',function(event){event.preventDefault();});
+    document.body.appendChild(progress); openPanelModal(progress);
+    try {
+      await imageStorageReady;
+      if (added.length && !db) throw new Error('Photo storage is unavailable. Nothing was restored. Enable browser storage and try again.');
+      for (var ai=0; ai<added.length; ai++) {
+        await new Promise(function(resolve,reject){
+          var image = new Image(), timer = setTimeout(function(){finish(new Error('An image could not be read. Nothing was restored.'));},10000);
+          function finish(error){clearTimeout(timer);image.onload=image.onerror=null;image.src='';error?reject(error):resolve();}
+          image.onload=function(){finish(image.naturalWidth*image.naturalHeight>40000000?new Error('An image is too large. Nothing was restored.'):null);};
+          image.onerror=function(){finish(new Error('This backup contains an unreadable image. Nothing was restored.'));};
+          image.src=added[ai].src;
+        });
+      }
+      var availableImages=Object.assign(Object.create(null),byId), seen=Object.create(null);
+      added.forEach(function(row){availableImages[row.id]=row.src;});
+      function available(id){if(!availableImages[id]||seen[id])return false;seen[id]=true;return true;}
+      var next={order:cleanIds(j.order).filter(available),backlog:cleanIds(j.backlog||j.hidden).filter(available),
+        cols:[3,4,5].indexOf(j.cols)>=0?j.cols:3,
+        railw:typeof j.railw==='number'&&isFinite(j.railw)&&j.railw>=84?j.railw:0,railh:!!j.railh,
+        meta:sanitizeMeta(j.meta),drafts:sanitizeDrafts(j.drafts)};
+      Object.keys(availableImages).forEach(function(id){if(isUser(id)&&!seen[id])next.backlog.push(id);});
+      var beforeRaw=localStorage.getItem(LS), wroteLayout=false;
+      function restorePreviousLayout(){
+        if(!wroteLayout)return true;
+        try {beforeRaw===null?localStorage.removeItem(LS):localStorage.setItem(LS,beforeRaw);return true;}
+        catch(error){save.failed=true;saveNotice(false);return false;}
+      }
+      if (added.length) {
+        await new Promise(function(resolve,reject){
+          var tx, failure;
+          function abort(error){failure=error;try{tx.abort();}catch(ignore){}}
+          function rejected(){
+            if(!restorePreviousLayout())reject(new Error('Restore failed and the browser blocked recovery. Save layout before reloading.'));
+            else reject(failure||new Error('Photo storage is full or blocked. Nothing was restored. Try again.'));
+          }
+          try {
+            tx=db.transaction('added','readwrite');tx.onabort=rejected;
+            tx.onerror=function(){failure=new Error('Photo storage is full or blocked. Nothing was restored. Try again.');};
+            tx.oncomplete=resolve;
+            var store=tx.objectStore('added');
+            added.forEach(function(row,index){
+              var request=store.put({id:row.id,src:row.src});
+              request.onsuccess=function(){if(index===added.length-1){
+                try{localStorage.setItem(LS,JSON.stringify(next));wroteLayout=true;}
+                catch(error){abort(new Error('Layout storage is full or blocked. Nothing was restored. Try again.'));}
+              }};
+            });
+          } catch(error){if(tx)abort(error);else rejected();}
+        });
+      } else {
+        try{localStorage.setItem(LS,JSON.stringify(next));}
+        catch(error){throw new Error('Layout storage is full or blocked. Nothing was restored. Try again.');}
+      }
+      dismissSplitChip();pushUndo();
+      added.forEach(function(row){byId[row.id]=row.src;});
+      state=next;clearSelection();save.failed=false;saveNotice(true);applyRail();render();toast('Layout restored');
+    } finally {progress.close();progress.remove();}
   }
   var importBusy = false;
   function processFiles(fileList, forceCollage){
@@ -1579,9 +1644,9 @@
     var button = document.getElementById('addimages'); if (button) button.disabled = true;
     var task;
     if (layouts.length){
-      task = readFile(layouts[0], true).then(function(raw){
+      task = (layouts[0].size > 150*1024*1024 ? Promise.reject(new Error('This backup exceeds the 150 MB limit. Nothing was changed.')) : readFile(layouts[0], true)).then(function(raw){
         var json; try { json = JSON.parse(raw); } catch(e){ throw new Error('That file is not valid JSON. Nothing was changed.'); }
-        importLayout(json);
+        return importLayout(json);
       });
     } else {
       toast('Adding ' + files.length + (files.length === 1 ? ' image...' : ' images...'));

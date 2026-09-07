@@ -53,7 +53,7 @@
     function at(x,y){return (vertical?y*W+x:x*W+y)*4;}
     function delta(a,b){return (Math.abs(data[a]-data[b])+Math.abs(data[a+1]-data[b+1])+Math.abs(data[a+2]-data[b+2]))/3;}
     for(var j=0;j<samples;j++){
-      var y=Math.min(across-1,Math.floor((j+.5)*across/samples));
+      var y=p.acrossStart===undefined?Math.min(across-1,Math.floor((j+.5)*across/samples)):Math.min(p.acrossEnd-1,Math.floor(p.acrossStart+(j+.5)*(p.acrossEnd-p.acrossStart)/samples));
       var a=at(left,y),z=at(right,y),d=delta(a,z),b=(delta(at(outerLeft,y),a)+delta(z,at(outerRight,y)))/2;
       // Perpendicular gutters contain the same background on both sides and
       // must not make independent photographs appear correlated.
@@ -153,22 +153,106 @@
     while(right<pos+2&&right<p.length&&p.score[right]>=threshold)right++;
     return [left,right];
   }
+  function gridGutterRegions(data,W,H,xp,yp,forceCollage){
+    // A consistent flat gutter can separate unequal rectangles and different
+    // numbers of photos in each row. Do not extrapolate a regular lattice into
+    // the empty end of a row. This deliberately excludes overlapping/freeform
+    // mosaics and textured gutters; those still need review or the original.
+    var colors=[];
+    [xp,yp].forEach(function(p){
+      for(var x=0;x<p.length-1;x++){
+        if(p.uniform[x]>2||p.uniform[x+1]>2)continue;
+        var color=[p.meanR[x],p.meanG[x],p.meanB[x]],known=colors.find(function(c){return Math.abs(c.rgb[0]-color[0])+Math.abs(c.rgb[1]-color[1])+Math.abs(c.rgb[2]-color[2])<8;});
+        if(known)known.weight++;else colors.push({rgb:color,weight:1});
+      }
+    });
+    colors.sort(function(a,b){return b.weight-a.weight;});
+    for(var candidate=0;candidate<Math.min(3,colors.length);candidate++){
+      var rgb=colors[candidate].rgb,stride=W+1,integral=new Uint32Array((W+1)*(H+1));
+      for(var y=0;y<H;y++){
+        var sum=0;
+        for(var x=0;x<W;x++){
+          var at=(y*W+x)*4;
+          if(Math.abs(data[at]-rgb[0])+Math.abs(data[at+1]-rgb[1])+Math.abs(data[at+2]-rgb[2])<18)sum++;
+          integral[(y+1)*stride+x+1]=integral[y*stride+x+1]+sum;
+        }
+      }
+      function area(l,t,r,b){return integral[b*stride+r]-integral[t*stride+r]-integral[b*stride+l]+integral[t*stride+l];}
+      function blank(l,t,r,b){return area(l,t,r,b)>=(r-l)*(b-t)*.998;}
+      var leaves=[],splits=0,axes=[0,0],invalid=false;
+      function divide(l,t,r,b,depth){
+        if(invalid)return;
+        if(depth>24||leaves.length>=144){invalid=true;return;}
+        while(l<r&&blank(l,t,l+1,b))l++;
+        while(r>l&&blank(r-1,t,r,b))r--;
+        while(t<b&&blank(l,t,r,t+1))t++;
+        while(b>t&&blank(l,b-1,r,b))b--;
+        if(l===r||t===b)return;
+        // Prefer full row gaps, then look for column gaps within each row.
+        for(var axis=1;axis>=0;axis--){
+          var start=axis?t:l,end=axis?b:r,bands=[];
+          for(var pos=start+1;pos<end-1;pos++){
+            if(!(axis?blank(l,pos,r,pos+1):blank(pos,t,pos+1,b)))continue;
+            var first=pos;
+            while(pos<end&&(axis?blank(l,pos,r,pos+1):blank(pos,t,pos+1,b)))pos++;
+            if(pos-first>=2)bands.push([first,pos]);
+          }
+          if(!bands.length)continue;
+          var p={data:data,W:W,H:H,vertical:!axis,length:axis?H:W,acrossStart:axis?l:t,acrossEnd:axis?r:b};
+          // A rule drawn across one continuous photo is weak evidence of a
+          // collage. Reject highly correlated content on its two sides.
+          if(bands.some(function(band){var c=gridSeamContinuity(p,band);return c.correlation>.8&&c.support<.3;})){invalid=true;return;}
+          splits+=bands.length;axes[axis]+=bands.length;
+          var from=start;
+          bands.concat([[end,end]]).forEach(function(band){if(axis)divide(l,from,r,band[0],depth+1);else divide(from,t,band[0],b,depth+1);from=band[1];});
+          return;
+        }
+        var width=r-l,height=b-t;
+        // Every outer edge must belong predominantly to photo content. An
+        // L-shaped remainder or overlapping mosaic is not a rectangular crop.
+        if(width<24||height<24||area(l,t,r,b)>width*height*.35||area(l,t,r,t+1)>width*.12||area(l,b-1,r,b)>width*.12||area(l,t,l+1,b)>height*.12||area(r-1,t,r,b)>height*.12){invalid=true;return;}
+        leaves.push([l,t,r,b]);
+      }
+      divide(0,0,W,H,0);
+      if(splits&&invalid)return {unresolved:true};
+      if(!invalid&&leaves.length>=(forceCollage?2:3)&&(axes[0]&&axes[1]||splits>=2)){
+        leaves.sort(function(a,b){return a[1]-b[1]||a[0]-b[0];});
+        var tops=[];leaves.forEach(function(box){if(tops.indexOf(box[1])<0)tops.push(box[1]);});
+        var columns=Math.max.apply(null,tops.map(function(top){return leaves.filter(function(box){return box[1]===top;}).length;}));
+        var rowBoxes=tops.map(function(top){return leaves.filter(function(box){return box[1]===top;});});
+        // Two matching complete rows establish an expected height. A shorter
+        // aligned final row is disclosed as partial, while its exact bounds stay.
+        var reference=rowBoxes[0],expectedHeight=reference[0][3]-reference[0][1];
+        function aligned(row){return row.length===reference.length&&row.every(function(box,i){return Math.abs(box[0]-reference[i][0])<=2&&Math.abs(box[2]-reference[i][2])<=2;});}
+        var partialLast=tops.length>=3&&rowBoxes.slice(0,-1).every(function(row){return aligned(row)&&row.every(function(box){return Math.abs(box[3]-box[1]-expectedHeight)<=2;});})&&aligned(rowBoxes[rowBoxes.length-1])&&rowBoxes[rowBoxes.length-1].every(function(box){return box[3]-box[1]<expectedHeight-2;});
+        return {boxes:leaves,rows:tops.length,columns:columns,partialLastRow:partialLast,irregular:leaves.length!==tops.length*columns||leaves.some(function(box){return box[2]-box[0]!==leaves[0][2]-leaves[0][0]||box[3]-box[1]!==leaves[0][3]-leaves[0][1];})};
+      }
+    }
+    return null;
+  }
   detectRegions = function(img, forceCollage){
     var W=img.naturalWidth||img.width,H=img.naturalHeight||img.height;
     var canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
     canvas.getContext('2d').drawImage(img,0,0,W,H);
-    function single(){return {canvas:canvas,boxes:[[0,0,W,H]],rows:1,columns:1,confidence:0,method:'single'};}
+    function single(unresolved){return {canvas:canvas,boxes:[[0,0,W,H]],rows:1,columns:1,confidence:0,method:'single',unresolvedLayout:!!unresolved};}
     var scale=Math.min(1,1800/Math.max(W,H)),w=Math.max(1,Math.round(W*scale)),h=Math.max(1,Math.round(H*scale));
     var analysis=canvas;
     if(scale<1){analysis=document.createElement('canvas');analysis.width=w;analysis.height=h;analysis.getContext('2d').drawImage(canvas,0,0,w,h);}
     var data;try{data=analysis.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data;}catch(e){return single();}
     var aw=w,ah=h,offsetX=0,offsetY=0;
     var xp=gridAxisProfile(data,w,h,true),yp=gridAxisProfile(data,w,h,false);
+    // Remove independently detected screenshot framing before looking for
+    // photo gutters. Header icons can otherwise look like malformed crops.
     var outerX=gridOuterSpan(xp),outerY=gridOuterSpan(yp);
     if(outerX[0]||outerY[0]||outerX[1]<w||outerY[1]<h){
       offsetX=outerX[0];offsetY=outerY[0];w=outerX[1]-offsetX;h=outerY[1]-offsetY;
       data=analysis.getContext('2d',{willReadFrequently:true}).getImageData(offsetX,offsetY,w,h).data;
       xp=gridAxisProfile(data,w,h,true);yp=gridAxisProfile(data,w,h,false);
+    }
+    var gutters=gridGutterRegions(data,w,h,xp,yp,forceCollage);
+    if(gutters){
+      if(gutters.unresolved)return single(true);
+      return {canvas:canvas,boxes:gutters.boxes.map(function(box){return [Math.round((offsetX+box[0])*W/aw),Math.round((offsetY+box[1])*H/ah),Math.round((offsetX+box[2])*W/aw),Math.round((offsetY+box[3])*H/ah)];}),rows:gutters.rows,columns:gutters.columns,confidence:.9,method:'uniform-gutters',irregularLayout:gutters.irregular,partialLastRow:!!gutters.partialLastRow};
     }
     var xf=gridAxisFits(xp),yf=gridAxisFits(yp),best=null;
     function quality(fit){return fit.count>=4?(fit.score*(fit.count-1)-fit.least)/(fit.count-2):fit.score;}
@@ -191,6 +275,9 @@
       var one={count:1,cuts:[],bands:[],score:1,continuity:1,correlation:0,error:0};
       [xf,yf].forEach(function(fits,axis){fits.forEach(function(fit){
         if(fit.count<(forceCollage?2:3)||fit.least<.42||fit.score<.6)return;
+        // One strong horizon is also common in a single photograph. Two-photo
+        // proposals need a visible gutter; ambiguous adjacent pairs stay whole.
+        if(fit.count===2&&fit.bands.some(function(band){return band[1]-band[0]<2;}))return;
         if(fit.continuity<.36&&fit.correlation>.4)return;
         var value=fit.score+.06*Math.log(fit.count)-.2*fit.error;
         if(!best||value>best.value)best={x:axis===0?fit:one,y:axis===1?fit:one,value:value};

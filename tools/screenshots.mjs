@@ -14,7 +14,10 @@ try {
     const page = await context.newPage(); await page.goto(server.url);
     await page.locator('#grid .tile').first().waitFor();
     await page.locator('.more-menu summary').click(); await page.getByLabel('Theme', { exact: true }).selectOption(theme); await page.locator('h1').click();
-    await page.locator('#grid img, #railitems img').evaluateAll(images => Promise.all(images.map(image => image.decode())));
+    await page.locator('#grid img, #railitems img').evaluateAll(images => {
+      images.forEach(image => { image.loading = 'eager'; });
+      return Promise.all(images.map(image => image.decode()));
+    });
     await page.screenshot({ path: join(output, `${name}.png`) }); captured.push(`${name}.png`);
     if (name === 'workspace') {
       await page.locator('#guide-start').click(); await page.locator('#guide-card[data-step="1"]').waitFor();
@@ -22,7 +25,9 @@ try {
       await page.locator('#guide-end').click();
       await page.locator('#fileinput').setInputFiles(join(root, 'tests', 'fixtures', 'grid-6x5.png'));
       await page.locator('.import-confirm:not([disabled])').waitFor();
+      await page.locator('#import-review h2').click();
       await page.locator('.import-confirm').focus();
+      await page.locator('#guide-hint').waitFor({ state: 'hidden' });
       await page.screenshot({ path: join(output, 'import-review.png') }); captured.push('import-review.png');
     }
     await context.close();
