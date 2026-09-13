@@ -34,8 +34,8 @@
     },
     {
       "path": "HANDOFF.md",
-      "sha256": "6dbf6f5b598ca6f26a873f08f1f7df027cafef162c678200622f12c0457f98bb",
-      "bytes": 4348
+      "sha256": "3fd00543431bdca4522dc203031469808b832a2223cd94f2ea448089dd2d2503",
+      "bytes": 5244
     },
     {
       "path": "README.md",
@@ -49,8 +49,8 @@
     },
     {
       "path": "TODO.md",
-      "sha256": "002a02d601fe3470d523a168d6d08c706ed148e4fe3e474cd7acbd81bdf1f7bc",
-      "bytes": 1445
+      "sha256": "42fdad721610ef24fb39e1d7986d11a70e95bdced62331c7075608a76eb706b8",
+      "bytes": 2538
     },
     {
       "path": "assets/README.md",
@@ -209,8 +209,8 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "ce44d45118897b713114bef45a24a4546f5f8d7a3914500ed5bc1396d9c9707c",
-      "bytes": 8090
+      "sha256": "cd746ef196ece325a2e1669eb5b5b218e0ca7fd3b0db22f92ab481a7c27380e3",
+      "bytes": 9188
     },
     {
       "path": "docs/images/README.md",
