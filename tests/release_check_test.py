@@ -3,6 +3,7 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+import re
 import struct
 import subprocess
 import sys
@@ -53,6 +54,20 @@ class ReleaseChecks(unittest.TestCase):
 
     def assert_issue(self, issues, fragment):
         self.assertTrue(any(fragment in issue for issue in issues), (fragment, issues))
+
+    def demo_parts(self):
+        source = (ROOT / "demo/index.html").read_text(encoding="utf-8")
+        bundled = re.search(r'<script id="bundled" type="application/json">(.*?)</script>', source, re.DOTALL)
+        saved = re.search(r'<script id="savedstate" type="application/json">(.*?)</script>', source, re.DOTALL)
+        self.assertIsNotNone(bundled)
+        self.assertIsNotNone(saved)
+        return source, json.loads(bundled[1]), json.loads(saved[1])
+
+    def demo_with(self, source, manifest, state):
+        for script_id, value in (("bundled", manifest), ("savedstate", state)):
+            pattern = r'(<script id="' + script_id + r'" type="application/json">)(.*?)(</script>)'
+            source = re.sub(pattern, lambda match: match[1] + json.dumps(value, separators=(",", ":")) + match[3], source, flags=re.DOTALL)
+        return source.encode()
 
     def test_clean_tracked_fixture_and_ignored_local_dependencies(self):
         self.write("node_modules/private-cache.txt", b"Local dependency cache")
@@ -144,13 +159,117 @@ class ReleaseChecks(unittest.TestCase):
         manifest[0]["src"], manifest[1]["src"] = manifest[1]["src"], manifest[0]["src"]
         changed = source[:match.start(1)] + json.dumps(manifest, separators=(",", ":")) + source[match.end(1):]
         self.assert_issue(check.inspect_payload("demo/index.html", changed.encode()), "bundled sample source")
-        # Reachable reviewed builds had only id/src/locked before sample:true
-        # was introduced. Preserve that schema without accepting extra fields.
+        # The expanded current demo must identify every demo sample explicitly.
         manifest = json.loads(match[1])
         for item in manifest:
             item.pop("sample")
         changed = source[:match.start(1)] + json.dumps(manifest, separators=(",", ":")) + source[match.end(1):]
-        self.assertEqual(check.inspect_payload("demo/index.html", changed.encode()), [])
+        for historical in (False, True):
+            with self.subTest(allow_historical=historical):
+                self.assert_issue(check.inspect_payload("demo/index.html", changed.encode(), allow_historical=historical), "bundled sample metadata")
+
+    def test_current_sample_and_default_state_contract(self):
+        source, manifest, state = self.demo_parts()
+        self.assertEqual([item["id"] for item in manifest], [f"sample_{n:02}" for n in range(1, 31)])
+        self.assertEqual([item["id"] for item in manifest if item["locked"]], ["sample_19", "sample_20", "sample_21"])
+        self.assertEqual(state["order"], [f"sample_{n:02}" for n in range(1, 13)] + [f"sample_{n:02}" for n in range(22, 31)])
+        self.assertEqual(state["backlog"], [f"sample_{n:02}" for n in range(13, 19)])
+        self.assertEqual(check.inspect_payload("demo/index.html", source.encode()), [])
+        for index in (18, 19, 20, 21, 29):
+            changed = json.loads(json.dumps(manifest))
+            changed[index]["locked"] = not changed[index]["locked"]
+            with self.subTest(index=index):
+                self.assert_issue(check.inspect_payload("demo/index.html", self.demo_with(source, changed, state)), "bundled sample metadata")
+
+    def test_historical_sample_versions_are_valid_only_in_history(self):
+        source, manifest, state = self.demo_parts()
+        old_state = dict(state, order=[f"sample_{n:02}" for n in range(1, 13)])
+        for has_sample_marker in (False, True):
+            old_manifest = json.loads(json.dumps(manifest[:21]))
+            if not has_sample_marker:
+                for item in old_manifest:
+                    item.pop("sample")
+            historical = self.demo_with(source, old_manifest, old_state)
+            with self.subTest(has_sample_marker=has_sample_marker):
+                self.assertEqual(check.inspect_payload("demo/index.html", historical, allow_historical=True), [])
+                self.assert_issue(check.inspect_payload("demo/index.html", historical), "invalid manifest")
+        old_manifest[0].pop("sample")
+        self.assert_issue(check.inspect_payload("demo/index.html", self.demo_with(source, old_manifest, old_state), allow_historical=True), "bundled sample metadata")
+
+    def test_sample_count_and_state_hybrids_do_not_use_historical_escape(self):
+        source, manifest, state = self.demo_parts()
+        old_state = dict(state, order=[f"sample_{n:02}" for n in range(1, 13)])
+        cases = [
+            (manifest[:21], state),
+            (manifest, old_state),
+            (manifest[:-1], state),
+            (manifest + [manifest[-1]], state),
+            (manifest, dict(state, order=state["order"][:-1] + ["sample_29"])),
+            (manifest, dict(state, backlog=state["backlog"] + ["sample_22"])),
+            (manifest, dict(state, railw=False)),
+            (manifest, dict(state, cols=3.0)),
+        ]
+        for number, (images, saved) in enumerate(cases):
+            for historical in (False, True):
+                with self.subTest(case=number, allow_historical=historical):
+                    self.assertTrue(check.inspect_payload("demo/index.html", self.demo_with(source, images, saved), allow_historical=historical))
+
+    def test_new_sample_mapping_and_private_metadata_are_pinned(self):
+        source, manifest, state = self.demo_parts()
+        changed = json.loads(json.dumps(manifest))
+        changed[21]["src"], changed[29]["src"] = changed[29]["src"], changed[21]["src"]
+        self.assert_issue(check.inspect_payload("demo/index.html", self.demo_with(source, changed, state)), "bundled sample source")
+        for key, value in (("original", "../final/private-source.jpg"), ("caption", "Synthetic personal note"), ("sample", 1), ("locked", 0)):
+            changed = json.loads(json.dumps(manifest))
+            changed[21][key] = value
+            with self.subTest(key=key):
+                self.assert_issue(check.inspect_payload("demo/index.html", self.demo_with(source, changed, state)), "bundled sample metadata")
+
+    def test_asset_manifest_exact_schema_and_historical_boundary(self):
+        manifest = json.loads((ROOT / "assets/manifest.json").read_bytes())
+        self.assertEqual(len(manifest["images"]), 27)
+        self.assertEqual([item["path"] for item in manifest["images"]], [f"assets/sample_{n:02}.png" for n in list(range(1, 19)) + list(range(22, 31))])
+        self.assertEqual(check.inspect_payload("assets/manifest.json", json.dumps(manifest).encode()), [])
+        old = {"images": manifest["images"][:18]}
+        self.assertEqual(check.inspect_payload("assets/manifest.json", json.dumps(old).encode(), allow_historical=True), [])
+        self.assert_issue(check.inspect_payload("assets/manifest.json", json.dumps(old).encode()), "independently pinned")
+        mutations = [dict(manifest, original="Synthetic private mapping"), {"images": manifest["images"][:-1]}, {"images": manifest["images"] + [manifest["images"][-1]]}]
+        for key, value in (("original", "Synthetic source"), ("width", 300.0), ("sha256", manifest["images"][-1]["sha256"])):
+            changed = json.loads(json.dumps(manifest))
+            changed["images"][18][key] = value
+            mutations.append(changed)
+        for number, changed in enumerate(mutations):
+            for historical in (False, True):
+                with self.subTest(case=number, allow_historical=historical):
+                    self.assert_issue(check.inspect_payload("assets/manifest.json", json.dumps(changed).encode(), allow_historical=historical), "independently pinned")
+
+    def test_duplicate_json_fields_cannot_hide_private_payloads(self):
+        source, manifest, state = self.demo_parts()
+        current = self.demo_with(source, manifest, state)
+        for old, new in ((b'"id":"sample_22"', b'"id":"synthetic-private-id","id":"sample_22"'),
+                         (b'"meta":{}', b'"meta":{"sample_22":{"caption":"Synthetic personal note"}},"meta":{}')):
+            changed = current.replace(old, new, 1)
+            self.assertNotEqual(current, changed)
+            self.assert_issue(check.inspect_payload("demo/index.html", changed), "invalid or unapproved bundled")
+        manifest = (ROOT / "assets/manifest.json").read_bytes()
+        duplicate = b'{"images":[], ' + manifest.lstrip()[1:]
+        self.assert_issue(check.inspect_payload("assets/manifest.json", duplicate), "invalid independently pinned")
+
+    def test_new_image_substitution_still_fails_after_both_manifests_refresh(self):
+        self.write("assets/sample_22.png", (ROOT / "assets/sample_23.png").read_bytes())
+        manifest = json.loads((self.root / "assets/manifest.json").read_bytes())
+        manifest["images"][18]["sha256"] = sha((self.root / "assets/sample_22.png").read_bytes())
+        self.write("assets/manifest.json", json.dumps(manifest).encode())
+        self.refresh_commit(["assets/sample_22.png"])
+        issues = check.check_tree(self.root)
+        self.assert_issue(issues, "assets/sample_22.png: image differs from independently pinned")
+        self.assert_issue(issues, "assets/manifest.json: differs")
+
+    def test_removing_required_asset_manifest_does_not_evade_policy(self):
+        (self.root / "assets/manifest.json").unlink()
+        inventory.refresh(self.root, removals=["assets/manifest.json"])
+        self.run_git("add", "--all")
+        self.assert_issue(check.check_tree(self.root), "required assets/manifest.json")
 
     def test_deleted_secret_remains_blocked_in_history(self):
         self.write("old-note.txt", ("gh" + "p_" + "D" * 36).encode())

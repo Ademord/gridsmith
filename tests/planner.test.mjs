@@ -114,7 +114,7 @@ async function scenario(t, run, options = {}) {
         offlineEnforcement = 'Browser context offline before file navigation and throughout the session.';
       }
     }
-    await page.goto(entry); await count(planned(page), 12); await count(library(page), 6);
+    await page.goto(entry); await count(planned(page), 21); await count(library(page), 6);
     await run(page, context);
     assert.deepEqual(errors, [], 'No uncaught browser or console errors');
     assert.deepEqual(network, [], 'The app must not request HTTP assets or remote services');
@@ -149,13 +149,13 @@ after(async () => {
   assert.equal(artifactStable, true, 'Tested files changed during this run; repeat the suite against a stable artifact');
 });
 
-test('sample workspace starts with 12 planned, 6 library and 3 posted cards', t => scenario(t, async page => {
+test('sample workspace starts with 21 planned, 6 library and 3 posted cards', t => scenario(t, async page => {
   await count(page.locator('#grid .tile.locked'), 3);
   assert.equal(await page.title(), 'Gridsmith | Feed planner');
   assert.equal(await page.locator('#undo').isDisabled(), true);
   assert.equal(await page.locator('#redo').isDisabled(), true);
   const sizes = await renderedImageSizes(page.locator('#grid img, #railitems img'));
-  assert.deepEqual(sizes, Array.from({ length: 21 }, () => [300, 400]));
+  assert.deepEqual(sizes, Array.from({ length: 30 }, () => [300, 400]));
 }));
 
 for (const [name, total] of [['grid-4x4.png', 16], ['grid-6x5.png', 30]]) {
@@ -232,7 +232,7 @@ test('draft save, load, delete and undo restore the named arrangement', t => sce
   await page.locator('#drafts-toggle').click(); await page.locator('#draft-name').fill('Sample launch');
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await page.keyboard.press('Escape');
-  await library(page).first().click(); await count(planned(page), 13);
+  await library(page).first().click(); await count(planned(page), 22);
   await page.locator('#drafts-toggle').click(); await page.getByRole('button', { name: 'Load Sample launch', exact: true }).click();
   assert.deepEqual(await order(page), initial); await count(library(page), 6);
   await page.reload(); await page.locator('#drafts-toggle').click();
@@ -263,7 +263,7 @@ test('closed import hints do not swallow editor Escape and visible hints dismiss
 
 test('layout backup restores imported photos, captions, dates and named drafts', t => scenario(t, async (page, context) => {
   await review(page); await page.locator('.import-mode select').selectOption('original'); await confirm(page, 7);
-  await library(page).first().click(); await count(planned(page), 13);
+  await library(page).first().click(); await count(planned(page), 22);
   const id = (await order(page))[0]; await planned(page).first().click();
   await page.getByLabel('Caption', { exact: true }).fill('Sample caption <still text>');
   await page.getByLabel('Planned date', { exact: true }).fill('2026-10-12'); await page.keyboard.press('Escape');
@@ -274,9 +274,9 @@ test('layout backup restores imported photos, captions, dates and named drafts',
   assert.deepEqual(saved.meta[id], { c: 'Sample caption <still text>', d: '2026-10-12' });
   await context.clearCookies();
   await page.evaluate(async () => { localStorage.clear(); await new Promise((resolve, reject) => { const request = indexedDB.open('gridsmith', 1); request.onsuccess = () => { const db = request.result; const tx = db.transaction('added', 'readwrite'); tx.objectStore('added').clear(); tx.oncomplete = () => { db.close(); resolve(); }; tx.onerror = () => reject(tx.error); }; }); });
-  await page.reload(); await count(planned(page), 12);
+  await page.reload(); await count(planned(page), 21);
   await page.locator('#fileinput').setInputFiles({ name: backup.name, mimeType: 'application/json', buffer: backup.bytes });
-  await count(planned(page), 13); await page.reload(); await count(planned(page), 13);
+  await count(planned(page), 22); await page.reload(); await count(planned(page), 22);
   assert.deepEqual(await order(page), saved.order); assert.deepEqual((await state(page)).meta[id], saved.meta[id]);
   await page.locator('#drafts-toggle').click(); await count(page.getByRole('button', { name: 'Load Backup sample', exact: true }), 1);
 }));
@@ -299,10 +299,10 @@ test('ZIP export includes ordered JPEGs and truthful metadata while protecting C
   const ids = await order(page);
   await planned(page).first().click(); await page.getByLabel('Caption', { exact: true }).fill('=SUM(1,2)'); await page.keyboard.press('Escape');
   const archive = await download(page, '#exportposts'); assert.match(archive.name, /^gridsmith-posts-\d{4}-\d{2}-\d{2}\.zip$/);
-  const files = unzipStored(archive.bytes); assert.equal(files.size, 18);
+  const files = unzipStored(archive.bytes); assert.equal(files.size, 27);
   const manifest = JSON.parse(files.get('manifest.json'));
-  assert.equal(manifest.imageCount, 15); assert.equal(manifest.previewCount, 15);
-  assert.deepEqual(manifest.images.slice(0, 12).map(image => image.id), ids);
+  assert.equal(manifest.imageCount, 24); assert.equal(manifest.previewCount, 24);
+  assert.deepEqual(manifest.images.slice(0, 21).map(image => image.id), ids);
   assert.equal(manifest.images.filter(image => image.status === 'posted').length, 3);
   assert.equal(manifest.images[0].caption, '=SUM(1,2)');
   assert.match(files.get('captions.csv').toString(), /"'=SUM\(1,2\)"/);
@@ -319,7 +319,7 @@ test('all four themes persist on reload without changing the arrangement', t => 
   for (const theme of ['charcoal', 'violet', 'amber', 'light']) {
     await page.locator('.more-menu summary').click(); await page.getByLabel('Theme', { exact: true }).selectOption(theme);
     colors.add(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()));
-    await page.reload(); await count(planned(page), 12);
+    await page.reload(); await count(planned(page), 21);
     assert.equal(await page.locator('html').getAttribute('data-theme'), theme); assert.deepEqual(await order(page), initial);
   }
   assert.equal(colors.size, 4, 'Each theme must have a distinct canvas color');
@@ -368,11 +368,11 @@ for (const width of [390, 320]) {
 
 test('blocked layout storage warns and still permits a downloadable backup', t => scenario(t, async page => {
   await page.evaluate(() => { Storage.prototype.setItem = function() { throw new DOMException('Synthetic quota test', 'QuotaExceededError'); }; });
-  await library(page).first().click(); await count(planned(page), 13);
+  await library(page).first().click(); await count(planned(page), 22);
   await textIncludes(page.locator('#toast'), 'Use Save layout');
   await textIncludes(page.locator('.local-note'), 'Unsaved changes');
   const backup = JSON.parse((await download(page, '#savelayout')).bytes);
-  assert.equal(backup.order.length, 13); assert.equal(backup.backlog.length, 5);
+  assert.equal(backup.order.length, 22); assert.equal(backup.backlog.length, 5);
 }));
 
 test('failed storage aborts an import without partial photos or an undo entry', t => scenario(t, async page => {
@@ -506,6 +506,6 @@ test('copied standalone HTML works offline through the guide, import, reload, ba
   assert.equal((await databaseRows(page))[0].src, rows[0].src, 'Restored image bytes must survive reload');
   const archive = await download(page, '#exportposts');
   const files = unzipStored(archive.bytes);
-  assert.equal(JSON.parse(files.get('manifest.json')).imageCount, 15);
+  assert.equal(JSON.parse(files.get('manifest.json')).imageCount, 24);
   assert.match(page.url(), /^file:/);
 }, { standalone: true }));

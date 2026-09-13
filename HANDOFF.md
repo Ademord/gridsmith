@@ -1,5 +1,13 @@
 # Gridsmith handoff
 
+## Current increment: nine more sample photos
+
+Version 1.2.0 adds nine explicitly requested, previously unposted sample photos, bringing the demo to 21 planned, 6 library and 3 fictional posted references. Original sample IDs and reference bytes remain stable. Existing browser layouts remain unchanged until Add sample photos is selected in the invitation or Help; only missing additions are appended, with durable Undo/Redo and a retry if saving fails. Private personal exports remain outside this repository.
+
+Build, review and delivery status are recorded in the v1.2.0 release and current validation record. The earlier completed release below remains historical evidence.
+
+## Version 1.1.1 publication record
+
 Updated 13 September 2026. Gridsmith is a browser-local feed planner with public source and a verified [GitHub Pages demo](https://ademord.github.io/gridsmith/). The owner instructed publication after disclosure of the public repository and the same 18 sample images. This supersedes the earlier missing-audience-approval hold; the historical hold remains in the review record. Read the [version 1.1.1 release notes](https://github.com/Ademord/gridsmith/releases/tag/v1.1.1) and Done milestone for final source, CI, download/live identities and delivery status.
 
 [Source](https://github.com/Ademord/gridsmith) | [CI](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml) | [Releases](https://github.com/Ademord/gridsmith/releases) | [Done milestone](https://github.com/Ademord/gridsmith/milestone/1)

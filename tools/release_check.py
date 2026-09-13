@@ -36,6 +36,20 @@ APPROVED_SAMPLES = (
     "f46b69ed59e924644866bbe1bd0b6a5fb9434d6083ddd819d7d01cf03d8a07a1",
     "5e9634712203f0c2bc4a683c8a59c2a91f09927b1c57d2db7d30332359e27142",
 )
+# IDs 19..21 remain the existing generated fictional posted references.
+# Nine additions requested on 13 September 2026; independently reviewed source
+# mapping, clean PNG encoding, reproduced pixels and local contact sheet.
+ADDITIONAL_SAMPLES = {
+    22: "3ba18def41d0cbc0aa33fbee6d0f43757624680de2841d0bef9c29840189f8d0",
+    23: "ae1046841d396fcab45afd899730127b89073457bd3cdd733367b7bc70d57448",
+    24: "7441b12da044417fb2d5ccd5211bdb5e7faefbced9ac04486eea6b35fc7c9f68",
+    25: "b0145c9bf26b033b001e4b97dfb500b6876e0b2809c93149f5e3b56dc64376fd",
+    26: "5bb97824c3c6464de7b39a2c7ff9ce6a67818223fedde24e17c4f251b2a028a2",
+    27: "d6841b2d5578fdf8d44edcccc947c2887f51a72c5b5ce8bdc6a84d8c76fa26b0",
+    28: "6c32ca4d2a564bc30da30a5ca41f2725999fc097a7964a969e192735a94b7ee5",
+    29: "9942b9ecb8645c79cb22248f145ce9115d4006decfad0d3ce155af50616d9b57",
+    30: "5d1248a8007d857f269fff0409c8f308091c102d0738b099aa5d28c0facb6ea7",
+}
 GENERATED_PNGS = {
     "grid-4x4": "1b07091b3e0062d33d6fdd6b2c28f1d37e3a392aa9e7965b240e43f54e116bea",
     "grid-6x5": "d92cd2eb09d9596c218bb741accdd279fd3f2811d2822c2bd97b52a1e450a651",
@@ -45,11 +59,11 @@ GENERATED_PNGS = {
 }
 APPROVED_SCREENSHOTS = {
     # Retain reviewed earlier encodings: reachable history is checked too.
-    "guided-tour": ("308132ab34fd7c792e873970c57dec95fbf8515ace62e5b923acb59ed25ed737", "700540211a3bd1e24bb68a1eeebeb6496d1f076ac40e78af3994bb73fe655a43", "1bc49826f15d2db69a0f126ececda07e1259136288fef98f70adec19bbbaff84", "fad16a2f7276b49b8edc32bb3e09395e3fe17a45ff24e6d6db2cdf04b731d0c8"),
-    "import-review": ("4cb95a2dfe9a4df2840554f4f4a56529a62ebd1cdf0bd4c33e7b1ec2cafff61b", "fb35dfba31f9a0d7e5cd6d4938855a408191cd4c4d1493c572b5eff63c2d5ed5"),
-    "mobile": ("e93131822f6fde33b5cdeab02717e35e915875a64fd59192922c72384e3e26b1", "18565ec2c4aab86b7d2c6614be20592647099152fab23805a0549ad87ffd639d", "b2e90755983c6ec1617650ef669f25470c6c52ac7e197b109229e31661d2d46c"),
-    "workspace-light": ("7b3e0b59b8c9f5c99e1bc48ba4e843171396eb7c238459719022e5a0e3476716", "a2341015ff354567784734d5ef4b0edcc4c1f40537cce2b1aede011ede2f663b", "2a05efcac4358d44294faf90eef21bb40cf2b7642f7ff704f3966237ad472188"),
-    "workspace": ("b1347092e5a6660ff3be72c7b0203086efc83f04a14fe30e0679596a1c2e640d", "b16ad93a0009d559d4f3ee439c22d0cff2d39f142907fefff15c13c31b600998", "efe32b478ff246208d4e28c42bfab3e73d28cb899f3c96b1b8c89bb450ccf605", "37c6f29acd8a360c2891fa68191ee1f251fd0bf334bfa04c532c2b8c748d16c5"),
+    "guided-tour": ("308132ab34fd7c792e873970c57dec95fbf8515ace62e5b923acb59ed25ed737", "700540211a3bd1e24bb68a1eeebeb6496d1f076ac40e78af3994bb73fe655a43", "1bc49826f15d2db69a0f126ececda07e1259136288fef98f70adec19bbbaff84", "fad16a2f7276b49b8edc32bb3e09395e3fe17a45ff24e6d6db2cdf04b731d0c8", "dfa20ac6c0390c5ab1a2617c54944b54731a9002a7db19a1e2cadfd18c46a480"),
+    "import-review": ("4cb95a2dfe9a4df2840554f4f4a56529a62ebd1cdf0bd4c33e7b1ec2cafff61b", "fb35dfba31f9a0d7e5cd6d4938855a408191cd4c4d1493c572b5eff63c2d5ed5", "a972f43a02ee9c1656121f0a5fc0129d1e33eae64084f29f9068f9be0627f8c9"),
+    "mobile": ("e93131822f6fde33b5cdeab02717e35e915875a64fd59192922c72384e3e26b1", "18565ec2c4aab86b7d2c6614be20592647099152fab23805a0549ad87ffd639d", "b2e90755983c6ec1617650ef669f25470c6c52ac7e197b109229e31661d2d46c", "7bbf34a8e29e3033fca0bd217eb599376ce53c30d87b5574430489699c3999de"),
+    "workspace-light": ("7b3e0b59b8c9f5c99e1bc48ba4e843171396eb7c238459719022e5a0e3476716", "a2341015ff354567784734d5ef4b0edcc4c1f40537cce2b1aede011ede2f663b", "2a05efcac4358d44294faf90eef21bb40cf2b7642f7ff704f3966237ad472188", "fa248fd8b900ebdb203860880df02455ead8f95acc95908693944f2a8bb468ef"),
+    "workspace": ("b1347092e5a6660ff3be72c7b0203086efc83f04a14fe30e0679596a1c2e640d", "b16ad93a0009d559d4f3ee439c22d0cff2d39f142907fefff15c13c31b600998", "efe32b478ff246208d4e28c42bfab3e73d28cb899f3c96b1b8c89bb450ccf605", "37c6f29acd8a360c2891fa68191ee1f251fd0bf334bfa04c532c2b8c748d16c5", "b15e2850b3b32de8f067b6fcada33550fa221d254be936dfff0516a8cd16e177"),
 }
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 HASH = re.compile(r"^[0-9a-f]{64}$")
@@ -58,6 +72,37 @@ REQUIRED_CLAIMS = frozenset(("functional", "browser", "offline", "privacy", "sou
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def strict_json(data):
+    """Reject duplicate fields instead of silently discarding payload data."""
+    def unique_fields(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate JSON field")
+            result[key] = value
+        return result
+    return json.loads(data, object_pairs_hook=unique_fields)
+
+
+def same_json(actual, expected):
+    # Python equality conflates false with 0 and true with 1. JSON does not.
+    return json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True)
+
+
+def photo_hashes(historical=False):
+    photos = dict(enumerate(APPROVED_SAMPLES, 1))
+    if not historical:
+        photos.update(ADDITIONAL_SAMPLES)
+    return photos
+
+
+def expected_asset_manifest(historical=False):
+    return {"images": [
+        {"path": f"assets/sample_{n:02}.png", "sha256": value, "width": 300, "height": 400}
+        for n, value in sorted(photo_hashes(historical).items())
+    ]}
 
 
 def git(root, *args):
@@ -157,7 +202,7 @@ def embedded_images(data):
         except ValueError as error:
             raise ValueError("Invalid embedded PNG encoding") from error
         png_size(payload)
-        if digest(payload) not in set(APPROVED_SAMPLES) | set(GENERATED_PNGS.values()):
+        if digest(payload) not in set(photo_hashes().values()) | set(GENERATED_PNGS.values()):
             raise ValueError("Unapproved embedded PNG hash")
         images.append(digest(payload))
     return images
@@ -173,7 +218,7 @@ def image_findings(name, data):
         size = png_size(data)
     except ValueError as error:
         return [str(error)]
-    expected = {f"assets/sample_{n:02}.png": value for n, value in enumerate(APPROVED_SAMPLES, 1)}
+    expected = {f"assets/sample_{n:02}.png": value for n, value in photo_hashes().items()}
     expected.update({f"assets/generated/{key}.png": value for key, value in GENERATED_PNGS.items()})
     expected.update({f"tests/fixtures/{key}.png": GENERATED_PNGS[key] for key in ("grid-4x4", "grid-6x5")})
     expected = {key: (value,) for key, value in expected.items()}
@@ -188,30 +233,48 @@ def image_findings(name, data):
     return issues
 
 
-def inspect_payload(name, data):
+def inspect_payload(name, data, *, allow_historical=False):
     issues = image_findings(name, data)
     if data.startswith(PNG_MAGIC):
         return issues
     issues.extend(text_findings(data))
+    if name == "assets/manifest.json":
+        try:
+            manifest = strict_json(data.decode("utf-8"))
+            matches = same_json(manifest, expected_asset_manifest())
+            if allow_historical:
+                matches = matches or same_json(manifest, expected_asset_manifest(historical=True))
+            if not matches:
+                issues.append("differs from independently pinned approval policy")
+        except (ValueError, UnicodeError):
+            issues.append("invalid independently pinned asset manifest")
     if name == "demo/index.html":
         try:
+            text = data.decode("utf-8")
+            bundled = re.findall(r'<script\s+id="bundled"\s+type="application/json">(.*?)</script>', text, re.DOTALL)
+            manifest = strict_json(bundled[0]) if len(bundled) == 1 else None
+            historical = allow_historical and isinstance(manifest, list) and len(manifest) == 21
+            sample_count = 21 if historical else 30
+            hashes = photo_hashes(historical)
+            hashes.update({n: GENERATED_PNGS[f"sample_{n}"] for n in (19, 20, 21)})
+            expected_samples = [value for _, value in sorted(hashes.items())]
             images = embedded_images(data)
-            expected_samples = list(APPROVED_SAMPLES) + [GENERATED_PNGS[f"sample_{n}"] for n in (19, 20, 21)]
             expected = expected_samples + [GENERATED_PNGS["grid-4x4"]]
             if sorted(images) != sorted(expected):
-                issues.append("bundled image set differs from approved 21 samples and guide fixture")
-            bundled = re.findall(r'<script\s+id="bundled"\s+type="application/json">(.*?)</script>', data.decode("utf-8"), re.DOTALL)
-            manifest = json.loads(bundled[0]) if len(bundled) == 1 else None
-            if not isinstance(manifest, list) or len(manifest) != 21:
+                issues.append("bundled image set differs from approved samples and guide fixture")
+            if not isinstance(manifest, list) or len(manifest) != sample_count:
                 issues.append("bundled samples have an invalid manifest")
             else:
+                allowed_keys = [{"id", "src", "locked", "sample"}]
+                if historical:
+                    allowed_keys.append({"id", "src", "locked"})
+                schema = set(manifest[0]) if isinstance(manifest[0], dict) else set()
                 for n, item in enumerate(manifest, 1):
-                    # Earlier reviewed builds predate the sample marker. Both
-                    # schemas exclude original URLs, captions and other data.
-                    allowed_keys = ({"id", "src", "locked"}, {"id", "src", "locked", "sample"})
-                    if (not isinstance(item, dict) or set(item) not in allowed_keys
+                    # Only historical 21-record builds may predate sample:true.
+                    # A build must use one exact schema throughout its manifest.
+                    if (not isinstance(item, dict) or schema not in allowed_keys or set(item) != schema
                             or item.get("id") != f"sample_{n:02}" or item.get("sample", True) is not True
-                            or item.get("locked") is not (n > 18)):
+                            or item.get("locked") is not (19 <= n <= 21)):
                         issues.append("bundled sample metadata differs from approved schema")
                         break
                     source = item.get("src")
@@ -220,13 +283,13 @@ def inspect_payload(name, data):
                             or digest(base64.b64decode(source[len(prefix):], validate=True)) != expected_samples[n - 1]):
                         issues.append("bundled sample source differs from approved identity")
                         break
-            saved = re.findall(r'<script\s+id="savedstate"\s+type="application/json">(.*?)</script>', data.decode("utf-8"), re.DOTALL)
+            saved = re.findall(r'<script\s+id="savedstate"\s+type="application/json">(.*?)</script>', text, re.DOTALL)
             expected_state = {
-                "order": [f"sample_{n:02}" for n in range(1, 13)],
+                "order": [f"sample_{n:02}" for n in range(1, 13)] + ([] if historical else [f"sample_{n:02}" for n in range(22, 31)]),
                 "backlog": [f"sample_{n:02}" for n in range(13, 19)],
                 "cols": 3, "railw": 0, "railh": False, "meta": {}, "drafts": [],
             }
-            if len(saved) != 1 or json.loads(saved[0]) != expected_state:
+            if len(saved) != 1 or not same_json(strict_json(saved[0]), expected_state):
                 issues.append("bundled saved state contains unapproved workspace data")
         except (ValueError, UnicodeError):
             issues.append("invalid or unapproved bundled image/state payload")
@@ -249,6 +312,8 @@ def check_tree(root):
             name = raw_name.decode("utf-8")
             indexed[name] = (mode, oid, stage)
     issues = []
+    if "assets/manifest.json" not in entries:
+        issues.append("required assets/manifest.json is absent from inventory")
     if set(indexed) != set(entries):
         issues.append("tracked paths differ from exact inventory (additions or omissions)")
     if git(root, "ls-files", "--others", "--exclude-standard", "-z"):
@@ -274,10 +339,6 @@ def check_tree(root):
             elif git(root, "cat-file", "blob", oid) != payload:
                 issues.append(f"{name}: staged payload differs from working payload")
         issues.extend(f"{name}: {issue}" for issue in inspect_payload(name, payload))
-    approved_manifest = json.loads(file_bytes(root, "assets/manifest.json").decode("utf-8")).get("images")
-    expected_manifest = [{"path": f"assets/sample_{n:02}.png", "sha256": value, "width": 300, "height": 400} for n, value in enumerate(APPROVED_SAMPLES, 1)]
-    if approved_manifest != expected_manifest:
-        issues.append("assets/manifest.json: differs from independently pinned approval policy")
     return issues
 
 
@@ -310,7 +371,7 @@ def check_history(root):
                 issues.append(f"history {commit[:12]}: forbidden path or nonregular entry")
                 continue
             data = git(root, "cat-file", "blob", oid)
-            issues.extend(f"history {commit[:12]} {name}: {issue}" for issue in inspect_payload(name, data))
+            issues.extend(f"history {commit[:12]} {name}: {issue}" for issue in inspect_payload(name, data, allow_historical=True))
     return issues
 
 

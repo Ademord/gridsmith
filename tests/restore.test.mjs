@@ -50,7 +50,8 @@ test('backup restoration rejects unreadable pixels and duplicate image identifie
 test('successful backup restoration persists image bytes and metadata across reload',()=>scenario(async({page,backup})=>{
   await restore(page,backup);assert.equal(await page.locator('#toast').textContent(),'Layout restored');
   assert.deepEqual(await rows(page),backup.added);await page.reload();
-  await until(async()=>await page.locator('#grid .tile:not(.locked)').count()===13);
+  await until(async()=>await page.locator('#grid .tile:not(.locked)').count()===22);
+  assert.deepEqual(await page.locator('#grid .tile:not(.locked)').evaluateAll(nodes=>nodes.map(node=>node.dataset.id)),backup.order);
   assert.deepEqual(await rows(page),backup.added);
   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('gridsmith.v3')).meta.urestore),backup.meta.urestore);
 }));

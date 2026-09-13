@@ -2,13 +2,13 @@
 
 A feed planner that keeps your photos and layouts in your browser. Arrange a grid, review crops from a collage, save named drafts, and download your posts in order. Dates are planning notes; Gridsmith does not publish to Instagram.
 
-[Source](https://github.com/Ademord/gridsmith) | [Live demo](https://ademord.github.io/gridsmith/) | [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.1.1/gridsmith-demo.html) | [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
+[Source](https://github.com/Ademord/gridsmith) | [Live demo](https://ademord.github.io/gridsmith/) | [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.2.0/gridsmith-demo.html) | [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
 
 The web demo, offline HTML and local preview use the same standalone app. Your own imports stay in your browser.
 
 ![Gridsmith sample workspace](docs/images/workspace.png)
 
-The demo starts with **12 planned images, six library images and three posted references**. The first 18 images are owner-approved, previously unposted generated images, published as 300 x 400 PNGs with metadata removed. The three abstract posted references are fictional. Actual posted photos and saved personal workspaces are excluded.
+The demo starts with **21 planned images, six library images and three posted references**. The 27 photos are owner-approved, previously unposted generated images, published as 300 x 400 PNGs with metadata removed. Returning visitors can select **Add 9 sample photos** in the demo invitation or Help. This appends only missing new samples and supports Undo; it does not reset a saved layout. The three abstract posted references are fictional. Actual posted photos and saved personal workspaces are excluded.
 
 Select **Try a grid import** to review a built-in collage, **Start tour** for the walkthrough, or arrange the samples yourself. Dismiss the invitation for more space; both options remain in **Help**. The [demo guide](DEMO-GUIDE.md) covers both paths.
 
@@ -74,7 +74,7 @@ npm test
 npm run screenshots
 ```
 
-`tools/build.py` uses the 18 approved PNGs in `assets/` and bundles the standalone `demo/index.html`. Generated reference cards and collage fixtures use canonical PNG bytes, checked against fixed hashes and exact generated pixels, to preserve the same output across platforms. It does not need the original image collection or a saved workspace. Screenshot capture uses fresh demo contexts and writes `docs/images/`.
+`tools/build.py` uses the 27 approved PNGs in `assets/` and bundles the standalone `demo/index.html`. Generated reference cards and collage fixtures use canonical PNG bytes, checked against fixed hashes and exact generated pixels, to preserve the same output across platforms. It does not need the original image collection or a saved workspace. Screenshot capture uses fresh demo contexts and writes `docs/images/`.
 
 For an existing local browser installation, set `PLAYWRIGHT_CHANNEL` (for example `msedge`) or `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`. A configured runtime can use `PLAYWRIGHT_MODULE`; ordinary installs need no overrides.
 

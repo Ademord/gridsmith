@@ -2,6 +2,8 @@
 
 ## Delivery record
 
+The current nine-photo expansion is tracked in the [v1.2.0 release record](https://github.com/Ademord/gridsmith/releases/tag/v1.2.0). It also produced a personal offline export kept outside this repository. The following publication record concerns the earlier release.
+
 The source is public and the [Pages demo](https://ademord.github.io/gridsmith/) passed independent hosted journeys. The earlier permission hold is superseded by the owner's 13 September publication instruction. Final version 1.1.1 source/CI/download/live identities and delivery closure are recorded in the [release notes](https://github.com/Ademord/gridsmith/releases/tag/v1.1.1) and [Done milestone](https://github.com/Ademord/gridsmith/milestone/1). The feature findings from this pass are independently resolved.
 
 ## Device checks not yet available
@@ -12,6 +14,12 @@ The source is public and the [Pages demo](https://ademord.github.io/gridsmith/) 
 
 - Rerun Windows WebKit when an allowed browser runtime is available. Code Integrity currently blocks its process before even a blank page loads. No OS policy was changed; Linux WebKit remains part of required CI.
 - Review the nonfatal action-runtime deprecation notices in GitHub Actions and update action majors in a separately tested maintenance change. The current workflows pass with GitHub's Node 24 compatibility handling.
+
+## Completed in the sample expansion
+
+- Added nine more approved sample photos from the saved collection.
+- Preserved existing sample/reference IDs and added an explicit, undoable sample update for returning visitors.
+- Prepared the available personal workspace export separately from the public release.
 
 ## Completed from the earlier TODO
 

@@ -1,5 +1,14 @@
 # Review records
 
+## Version 1.2.0: nine additional samples
+
+The owner requested nine more previously unposted photos for the public demo. A separate reviewer reproduced the nine 300 x 400 PNGs from the approved source selection and inspected them against the excluded posted references. Original sample and fictional-reference bytes remain unchanged. The public asset policy accepts exactly 27 approved photos; private source mappings and personal exports are excluded.
+
+The expanded workspace has 21 planned photos, 6 library photos and 3 fictional posted references. Existing layouts are preserved. An explicit Add sample photos action appends missing additions, writes the saved layout before changing the interface or history, and supports Undo/Redo. Local Chromium passed all 52 cases without skips, including older layouts, partial additions in the Library, captions/drafts, save-failure retry, focus and exact restored order. Early failures from stale starter counts, an invalid test draft fixture and text-file encoding are retained in local evidence; expectations were corrected to the actual 21-photo starter without removing cases or increasing time limits.
+
+Current source CI, downloaded offline parity and hosted checks are separate release gates. See the [v1.2.0 release record](https://github.com/Ademord/gridsmith/releases/tag/v1.2.0) for the exact commit and their outcomes. Earlier results below apply to their earlier version only.
+
+
 ## Version 1.1.1 — 13 September 2026
 
 Demo SHA-256: `9c3ed5286e44f8a69cebd17abbb6bce076c81cd87c2f4a6e4da22624ee7ffe76`. This release moves the demo invitation into the document flow, adds dismissal as a separate browser preference, and keeps the tour and sample import accessible from Help. Escape in Help now preserves the selected photos beneath it; Escape in the workspace still clears selection.

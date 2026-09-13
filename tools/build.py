@@ -54,24 +54,25 @@ def canonical_png(name, expected):
 def build(check=False):
     src = ROOT / 'planner_src'
     approved = json.loads((ROOT/'assets'/'manifest.json').read_text())['images']
-    if len(approved) != 18:
-        raise ValueError('Expected 18 approved demo images')
-    payloads = []
-    for n, entry in enumerate(approved, 1):
+    if len(approved) != 27:
+        raise ValueError('Expected 27 approved demo images')
+    payloads = {}
+    sample_numbers = list(range(1, 19)) + list(range(22, 31))
+    for n, entry in zip(sample_numbers, approved):
         if entry['path'] != f'assets/sample_{n:02}.png':
             raise ValueError('Unexpected sample path')
         payload = (ROOT/entry['path']).read_bytes()
         if hashlib.sha256(payload).hexdigest() != entry['sha256']:
             raise ValueError('Approved sample hash mismatch')
-        payloads.append(payload)
-    manifest = [{'id':f'sample_{n:02}', 'src':'data:image/png;base64,'+base64.b64encode(payloads[n-1] if n<=18 else canonical_png(f'sample_{n:02}',sample(n))).decode(), 'locked': n>18, 'sample': True} for n in range(1,22)]
-    state = {'order':[m['id'] for m in manifest[:12]], 'backlog':[m['id'] for m in manifest[12:18]], 'cols':3,
+        payloads[n] = payload
+    manifest = [{'id':f'sample_{n:02}', 'src':'data:image/png;base64,'+base64.b64encode(payloads[n] if n in payloads else canonical_png(f'sample_{n:02}',sample(n))).decode(), 'locked': 19 <= n <= 21, 'sample': True} for n in range(1,31)]
+    state = {'order':[m['id'] for m in manifest[:12] + manifest[21:]], 'backlog':[m['id'] for m in manifest[12:18]], 'cols':3,
              'railw':0,'railh':False,'meta':{},'drafts':[]}
     app = (src / 'app.js').read_text(encoding='utf-8')
     marker = '  var imageStorageReady = idb().then(function(d){'
     if marker not in app:
         raise ValueError('App integration marker changed; update the public build')
-    app = app.replace(marker, '\n'.join((src / (name+'.js')).read_text(encoding='utf-8') for name in MODULES)+'\n'+marker, 1)
+    app = app.replace(marker, (ROOT/'demo_src'/'samples.js').read_text(encoding='utf-8')+'\n'+ '\n'.join((src / (name+'.js')).read_text(encoding='utf-8') for name in MODULES)+'\n'+marker, 1)
     html = (src / 'page.html').read_text(encoding='utf-8')
     html = html.replace('<meta charset="utf-8">', '<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; img-src data: blob:; connect-src data: blob:; font-src data:; object-src \'none\'; base-uri \'none\'; form-action \'none\'">')
     for token,name in [('__BASE_CSS__','base.css'),('__DESIGN_CSS__','design.css'),('__IMPORT_CSS__','import-review.css'),('__THEMES_CSS__','themes.css')]:
@@ -92,7 +93,7 @@ def build(check=False):
     guide = '<style>'+guide_css+'</style><script id="gridsmith-guide-fixture" type="application/json">'+json.dumps(guide_fixture,separators=(',',':'))+'</script><script>'+guide_js+'</script>'
     html = html.replace('</body>', guide+'</body>')
     outputs[ROOT/'demo'/'index.html'] = html.encode('utf-8')
-    outputs[ROOT/'demo'/'build-info.json'] = (json.dumps({'sha256':hashlib.sha256(outputs[ROOT/'demo'/'index.html']).hexdigest(), 'bytes':len(outputs[ROOT/'demo'/'index.html']), 'fixture':'18 approved demo images; 3 generated posted references; no real posted photos'},indent=2)+'\n').encode()
+    outputs[ROOT/'demo'/'build-info.json'] = (json.dumps({'sha256':hashlib.sha256(outputs[ROOT/'demo'/'index.html']).hexdigest(), 'bytes':len(outputs[ROOT/'demo'/'index.html']), 'fixture':'27 approved demo images; 3 generated posted references; no real posted photos'},indent=2)+'\n').encode()
     for path,content in outputs.items():
         if check:
             if not path.exists() or path.read_bytes()!=content:
@@ -100,7 +101,7 @@ def build(check=False):
         else:
             path.parent.mkdir(parents=True,exist_ok=True)
             path.write_bytes(content)
-    print('Generated artifacts are current.' if check else 'Built standalone planner with 18 approved demo images, 3 generated posted references and two grid fixtures.')
+    print('Generated artifacts are current.' if check else 'Built standalone planner with 27 approved demo images, 3 generated posted references and two grid fixtures.')
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()

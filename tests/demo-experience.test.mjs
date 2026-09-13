@@ -21,6 +21,16 @@ async function until(check, message) {
   assert.fail(message);
 }
 const count = (locator, expected) => until(async () => await locator.count() === expected, `Expected ${expected} elements`);
+const originalSamples = Array.from({ length: 12 }, (_, i) => `sample_${String(i + 1).padStart(2, '0')}`);
+const extraSamples = Array.from({ length: 9 }, (_, i) => `sample_${i + 22}`);
+const originalLibrary = Array.from({ length: 6 }, (_, i) => `sample_${i + 13}`);
+async function olderWorkspace(page, extra = {}) {
+  const layout = { order: originalSamples, backlog: originalLibrary, cols: 5, railw: 180, railh: false,
+    meta: { sample_01: { c: 'Keep my caption', d: '2026-10-12' } }, drafts: [], ...extra };
+  await page.evaluate(layout => localStorage.setItem('gridsmith.v3', JSON.stringify(layout)), layout);
+  await page.reload(); await count(planned(page), layout.order.length);
+  return layout;
+}
 async function scenario(t, run, { width = 1440, height = 1000, offline = false } = {}) {
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce' });
   const page = await context.newPage(); page.setDefaultTimeout(15000);
@@ -37,7 +47,7 @@ async function scenario(t, run, { width = 1440, height = 1000, offline = false }
       await context.route(/^https?:\/\//, route => route.abort('internetdisconnected'));
       entry = pathToFileURL(portable).href;
     }
-    await page.goto(entry); await count(planned(page), 12); await count(library(page), 6);
+    await page.goto(entry); await count(planned(page), 21); await count(library(page), 6);
     await run(page);
     assert.deepEqual(errors, [], 'The experience must not throw browser errors');
     assert.deepEqual(network, [], 'Manual samples and ZIP export need no HTTP assets');
@@ -55,6 +65,54 @@ before(async () => {
   await mkdir(output, { recursive: true }); initialHash = await hash();
   server = await startServer(); browser = await launchBrowser();
 });
+
+test('expanded starter keeps existing sample IDs and adds exactly nine planned photos', t => scenario(t, async page => {
+  assert.deepEqual(await planned(page).evaluateAll(nodes => nodes.map(node => node.dataset.id)), [...originalSamples, ...extraSamples]);
+  assert.deepEqual(await library(page).evaluateAll(nodes => nodes.map(node => node.dataset.id)), originalLibrary);
+  assert.deepEqual(await page.locator('#grid .tile.locked').evaluateAll(nodes => nodes.map(node => node.dataset.id)), ['sample_19', 'sample_20', 'sample_21']);
+  assert.equal(await page.locator('[data-add-samples]').first().isVisible(), false);
+}));
+
+test('older edited workspace adds missing samples explicitly with durable Undo and Redo', t => scenario(t, async page => {
+  const draft = { id: 'keep-draft', name: 'My arrangement', order: originalSamples, backlog: originalLibrary, meta: {}, createdAt: 1 };
+  const before = await olderWorkspace(page, { order: [...originalSamples].reverse(), drafts: [draft] });
+  const preserved = await stored(page);
+  assert.deepEqual(preserved, before);
+  const button = page.locator('[data-add-samples]').first();
+  assert.equal(await button.textContent(), 'Add 9 sample photos');
+  await button.click(); await count(planned(page), 21);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'grid');
+  assert.deepEqual(await stored(page), { ...preserved, order: [...preserved.order, ...extraSamples] });
+  await page.locator('#undo').click(); await count(planned(page), 12);
+  assert.deepEqual(await stored(page), preserved);
+  await page.locator('#redo').click(); await count(planned(page), 21);
+  await page.reload(); await count(planned(page), 21);
+  assert.deepEqual(await stored(page), { ...preserved, order: [...preserved.order, ...extraSamples] });
+  assert.equal(await page.locator('[data-add-samples]').first().isVisible(), false);
+}));
+
+test('sample addition preserves an existing library sample and retries a denied save from Help', t => scenario(t, async page => {
+  const before = await olderWorkspace(page, { backlog: [...originalLibrary, extraSamples[0]] });
+  await page.locator('#library-search').fill('no matching photos');
+  await count(page.locator('#railitems .bitem:visible'), 0);
+  await page.locator('#guide-dismiss').click();
+  await page.evaluate(() => {
+    window.sampleTestSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) { if (key === 'gridsmith.v3') throw new DOMException('Full', 'QuotaExceededError'); return window.sampleTestSetItem.call(this, key, value); };
+  });
+  await page.locator('#helpbutton').click();
+  const helpButton = page.locator('#help-dialog [data-add-samples]');
+  assert.equal(await helpButton.textContent(), 'Add 8 sample photos');
+  await helpButton.click();
+  await until(async () => (await page.locator('#toast').textContent()).includes('could not be saved'), 'Denied save needs a retry message');
+  assert.deepEqual(await stored(page), before); await count(planned(page), 12);
+  assert.equal(await page.locator('#undo').isDisabled(), true);
+  await page.evaluate(() => { Storage.prototype.setItem = window.sampleTestSetItem; });
+  await page.locator('#helpbutton').click(); await helpButton.click(); await count(planned(page), 20);
+  assert.deepEqual(await stored(page), { ...before, order: [...before.order, ...extraSamples.slice(1)] });
+  await page.reload(); await count(planned(page), 20); await count(library(page), 7);
+  assert.deepEqual(await library(page).evaluateAll(nodes => nodes.map(node => node.dataset.id)), before.backlog);
+}));
 after(async () => {
   const version = browser?.version(); await browser?.close(); await server?.close();
   const finalHash = await hash();
@@ -130,7 +188,7 @@ for (const options of [{ width: 1440, height: 1000 }, { width: 320, height: 640 
     assert.equal(await page.locator('.guide-dock').isVisible(), false);
     assert.equal(await page.locator('#grid').evaluate(node => document.activeElement === node), true);
     assert.deepEqual(await stored(page), before, 'Dismissal is separate from the layout');
-    await page.reload(); await count(planned(page), 12);
+    await page.reload(); await count(planned(page), 21);
     assert.equal(await page.locator('.guide-dock').isVisible(), false, 'Dismissal persists through reload');
     await planned(page).first().focus(); await page.keyboard.press('Space');
     const selection = await selected(page); assert.equal(selection.length, 1);
@@ -190,8 +248,8 @@ test('copied offline demo ZIP identifies fictional samples and preserves actual 
   const download = page.waitForEvent('download'); await page.locator('#exportposts').click();
   const archive = await download, files = unzipStored(await readFile(await archive.path()));
   const manifest = JSON.parse(files.get('manifest.json'));
-  assert.equal(manifest.imageCount, 15); assert.equal(manifest.sampleCount, 15); assert.equal(manifest.previewCount, 15);
-  assert.deepEqual(manifest.images.slice(0, 12).map(row => row.id), order);
+  assert.equal(manifest.imageCount, 24); assert.equal(manifest.sampleCount, 24); assert.equal(manifest.previewCount, 24);
+  assert.deepEqual(manifest.images.slice(0, 21).map(row => row.id), order);
   assert.equal(manifest.images.filter(row => row.fictionalReference).length, 3);
   for (const row of manifest.images) {
     assert.equal(row.sample, true); assert.equal(row.source, 'demo-sample-preview');

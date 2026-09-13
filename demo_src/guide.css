@@ -34,3 +34,5 @@ dialog.guide-constrained{top:0;bottom:auto;margin:var(--guide-clearance) auto 12
 @media(prefers-reduced-motion:reduce){.guide-card,.guide-shade,.guide-target{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 @media(forced-colors:active){.guide-card,.guide-dock,.guide-hint{border:2px solid CanvasText}.guide-shade{display:none!important}.guide-target{outline:3px solid Highlight}}
 @media print{.guide-card,.guide-dock,.guide-shade,.guide-hint,.guide-help{display:none!important}}
+
+[data-add-samples][hidden] { display: none; }
