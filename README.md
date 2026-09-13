@@ -2,15 +2,15 @@
 
 A feed planner that keeps your photos and layouts in your browser. Arrange a grid, review crops from a collage, save named drafts, and download your posts in order. Dates are planning notes; Gridsmith does not publish to Instagram.
 
-[GitHub Pages demo (publication pending)](https://ademord.github.io/gridsmith/) | [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.1.0/gridsmith-demo.html) | [Source](https://github.com/Ademord/gridsmith) | [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
+[Source](https://github.com/Ademord/gridsmith) | [Live demo](https://ademord.github.io/gridsmith/) | [Download the offline demo](https://github.com/Ademord/gridsmith/releases/download/v1.1.1/gridsmith-demo.html) | [Checks](https://github.com/Ademord/gridsmith/actions/workflows/ci.yml)
 
-GitHub Pages publication is waiting for approval to make this reviewed repository public. The offline demo and local preview work independently of hosting.
+The web demo, offline HTML and local preview use the same standalone app. Your own imports stay in your browser.
 
 ![Gridsmith sample workspace](docs/images/workspace.png)
 
 The demo starts with **12 planned images, six library images and three posted references**. The first 18 images are owner-approved, previously unposted generated images, published as 300 x 400 PNGs with metadata removed. The three abstract posted references are fictional. Actual posted photos and saved personal workspaces are excluded.
 
-Select **Try a grid import** to review a built-in collage, **Start tour** for the walkthrough, or arrange the samples yourself. The [demo guide](DEMO-GUIDE.md) covers both paths.
+Select **Try a grid import** to review a built-in collage, **Start tour** for the walkthrough, or arrange the samples yourself. Dismiss the invitation for more space; both options remain in **Help**. The [demo guide](DEMO-GUIDE.md) covers both paths.
 
 ## Try it locally
 
@@ -95,8 +95,8 @@ If storage is blocked or full, **Unsaved changes** appears in the header and not
 
 ## Continuous integration and hosting
 
-[Browser and release checks](.github/workflows/ci.yml) verify the exact inventory, image policy, reachable history and generated page, and run Chromium, Firefox and WebKit cases. The [Publish sample demo](.github/workflows/pages.yml) workflow reuses those checks and uploads only `demo/`. GitHub Pages is still awaiting approval for public repository visibility.
+[Browser and release checks](.github/workflows/ci.yml) verify the exact inventory, image policy, reachable history and generated page, and run Chromium, Firefox and WebKit cases. The [Publish sample demo](.github/workflows/pages.yml) workflow reuses those checks and uploads only `demo/`. Releases record the tested source commit, workflow runs and downloaded/hosted artifact hashes.
 
-The exact source snapshot and assets are inventoried in [PUBLIC-CONTENTS.json](PUBLIC-CONTENTS.json). Both inventory and verification tools are in this repository. See the [version 1.1 review record](docs/VALIDATION.md), [release instructions](docs/RELEASE.md) and [review rules](docs/GOVERNANCE.md); refreshing a hash is not approval.
+The exact source snapshot and assets are inventoried in [PUBLIC-CONTENTS.json](PUBLIC-CONTENTS.json). Both inventory and verification tools are in this repository. See the [review records](docs/VALIDATION.md), [release instructions](docs/RELEASE.md) and [review rules](docs/GOVERNANCE.md); refreshing a hash is not approval.
 
 See [the handoff](HANDOFF.md) for current scope and [remaining work](TODO.md) for open tasks.

@@ -55,7 +55,10 @@
     if(!node||node.classList.contains('locked'))return;
     ev.preventDefault();ev.stopImmediatePropagation();toggleSelect(node.dataset.id);
   },true);});
-  window.addEventListener('keydown',function(ev){if(ev.key==='Escape')setSelectionMode(false);});
+  window.addEventListener('keydown',function(ev){
+    if(ev.defaultPrevented||ev.target.closest('dialog,[role="dialog"],.lightbox'))return;
+    if(ev.key==='Escape')setSelectionMode(false);
+  });
 
   var compactLibrary=matchMedia('(max-width:760px) and (max-height:650px)'), libraryPreference=null;
   try{libraryPreference=localStorage.getItem('gridsmith.libraryCollapsed');}catch(e){}

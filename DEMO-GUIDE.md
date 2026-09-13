@@ -1,12 +1,14 @@
 # A five-minute sample demo
 
-Download [gridsmith-demo.html](https://github.com/Ademord/gridsmith/releases/download/v1.1.0/gridsmith-demo.html) and open it directly. For a local checkout, run `npm run serve` and use the printed localhost URL. GitHub Pages is pending approval to make the reviewed repository and sample images public.
+Open the [web demo](https://ademord.github.io/gridsmith/) or download [gridsmith-demo.html](https://github.com/Ademord/gridsmith/releases/download/v1.1.1/gridsmith-demo.html). For a local checkout, run `npm run serve` and use the printed localhost URL. The offline HTML opens directly in a browser.
 
 In a fresh browser context, the workspace begins with 12 planned images and six library images approved for this demo, plus three fictional abstract posted references. The 18 approved images are previously unposted generated images, resized to 300 × 400 with metadata removed. Actual posted photos are excluded. Your browser may restore an arrangement you previously saved at the same address.
 
 Select **Start tour** for a 17-step walkthrough anchored to the live controls. Next step advances explicitly, Pause tour stops timed progression, and End tour keeps your current work. The tour moves a bundled sample card and fills only its blank caption/date fields. Import confirmation and downloads always wait for you. Existing text is preserved; editing a field pauses the guide. Restart tour returns the guide to its first step without resetting the layout.
 
-Select **Try a grid import** in the same dock to explore manually. It opens the real review dialog with an embedded generated 4 × 4 grid, including when the HTML is copied elsewhere and opened offline. It does not start the tour or add photos. Choose which crops to keep, inspect and adjust them, then select Import yourself or Cancel. Closing the review returns keyboard focus to the button. Existing photos, captions, selections and drafts stay in place.
+Select **Try a grid import** above the feed to explore manually. It opens the real review dialog with an embedded generated 4 × 4 grid, including when the HTML is copied elsewhere and opened offline. It does not start the tour or add photos. Choose which crops to keep, inspect and adjust them, then select Import yourself or Cancel. Closing the review returns keyboard focus to its entry control. Existing photos, captions, selections and drafts stay in place.
+
+The invitation scrolls with the feed so it leaves the Library accessible. Dismiss it with the × button when you want more space. **Help** always offers **Start tour** and **Try a grid import**. Dismissal is a separate browser preference; it stays through reload and tour exit without changing your layout. If preference storage is blocked, it lasts for the current visit.
 
 ![The guided demo uses the live planner controls](docs/images/guided-tour.png)
 

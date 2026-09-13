@@ -21,8 +21,8 @@ async function until(check, message) {
   assert.fail(message);
 }
 const count = (locator, expected) => until(async () => await locator.count() === expected, `Expected ${expected} elements`);
-async function scenario(t, run, { width = 1440, offline = false } = {}) {
-  const context = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: 'reduce' });
+async function scenario(t, run, { width = 1440, height = 1000, offline = false } = {}) {
+  const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'reduce' });
   const page = await context.newPage(); page.setDefaultTimeout(15000);
   const errors = [], network = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -47,7 +47,7 @@ async function scenario(t, run, { width = 1440, offline = false } = {}) {
     await page.screenshot({ path: join(output, t.name.replace(/[^a-z0-9]+/gi, '-') + '.png'), fullPage: true }).catch(() => {});
     throw error;
   } finally {
-    evidence.push({ test: t.name, width, offline, passed, failure, errors, network });
+    evidence.push({ test: t.name, width, height, offline, passed, failure, errors, network });
     await context.close();
   }
 }
@@ -111,6 +111,67 @@ for (const options of [{ width: 1440 }, { width: 320 }, { width: 390, offline: t
     assert.deepEqual((await stored(page)).meta, before.meta);
   }, options));
 }
+
+for (const options of [{ width: 1440, height: 1000 }, { width: 320, height: 640 }, { width: 390, height: 844, offline: true }]) {
+  test(`demo invitation leaves controls accessible and stays dismissed at ${options.width} by ${options.height}`, t => scenario(t, async page => {
+    if (options.width < 760) {
+      const toggle = page.locator('#library-collapse');
+      const expanded = await toggle.getAttribute('aria-expanded');
+      await toggle.click();
+      assert.notEqual(await toggle.getAttribute('aria-expanded'), expanded, 'Library must work before dismissing the invitation');
+      await toggle.click();
+    }
+    await planned(page).first().click();
+    await page.getByLabel('Caption', { exact: true }).fill('My work stays when I hide the demo');
+    await page.getByRole('button', { name: 'Close post preview', exact: true }).click();
+    const before = await stored(page);
+    await page.getByRole('button', { name: 'Dismiss demo invitation', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('.guide-dock').isVisible(), false);
+    assert.equal(await page.locator('#grid').evaluate(node => document.activeElement === node), true);
+    assert.deepEqual(await stored(page), before, 'Dismissal is separate from the layout');
+    await page.reload(); await count(planned(page), 12);
+    assert.equal(await page.locator('.guide-dock').isVisible(), false, 'Dismissal persists through reload');
+    await planned(page).first().focus(); await page.keyboard.press('Space');
+    const selection = await selected(page); assert.equal(selection.length, 1);
+    await page.locator('#helpbutton').click(); await page.keyboard.press('Escape');
+    await page.locator('#help-dialog').waitFor({ state: 'hidden' });
+    assert.deepEqual(await selected(page), selection, 'Escape closes Help without clearing photos underneath');
+    await page.locator('#helpbutton').click();
+    await page.locator('#guide-help-import').click();
+    await count(page.locator('.import-tile'), 16);
+    assert.deepEqual(await stored(page), before);
+    await page.locator('.import-cancel').click();
+    assert.equal(await page.locator('#helpbutton').evaluate(node => document.activeElement === node), true, 'Cancel returns to an available Help control');
+    await page.locator('#helpbutton').click();
+    await page.locator('#guide-help-start').click();
+    await page.locator('#guide-card[data-step="1"]').waitFor();
+    await page.locator('#guide-end').click();
+    assert.equal(await page.locator('.guide-dock').isVisible(), false, 'Ending the tour respects dismissal');
+    assert.equal(await page.locator('#helpbutton').evaluate(node => document.activeElement === node), true);
+    assert.deepEqual(await stored(page), before, 'Help and tour exit preserve saved work');
+    assert.deepEqual(await selected(page), selection);
+    await page.keyboard.press('Escape');
+    assert.deepEqual(await selected(page), [], 'Escape still clears selection in the workspace');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  }, options));
+}
+
+test('blocked preference storage still lets the invitation dismiss for this visit', t => scenario(t, async page => {
+  await page.evaluate(() => {
+    const savePreference = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'gridsmith.demoDismissed') throw new DOMException('Storage unavailable', 'QuotaExceededError');
+      return savePreference.call(this, key, value);
+    };
+  });
+  await page.locator('#guide-dismiss').click();
+  await page.locator('#helpbutton').click(); await page.locator('#guide-help-start').click();
+  await page.locator('#guide-card[data-step="1"]').waitFor(); await page.locator('#guide-end').click();
+  assert.equal(await page.locator('.guide-dock').isVisible(), false);
+  await page.reload(); await page.locator('#guide-start').waitFor();
+  assert.equal(await page.locator('#guide-start').isVisible(), true, 'Unavailable persistence may show the invitation again next visit');
+}, { width: 320, height: 640 }));
 
 function unzipStored(bytes) {
   const files = new Map(); let offset = 0;

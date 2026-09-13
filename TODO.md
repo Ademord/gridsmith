@@ -2,8 +2,8 @@
 
 ## Required delivery
 
-- Obtain explicit approval to make the reviewed Gridsmith repository public, including source and the 18 approved sample images. The current private plan cannot host Pages.
-- After approval, enable Pages with GitHub Actions and dispatch `pages.yml`. Verify successful checks, the served HTML hash, and actual import, guide and export controls. Update pending hosting links and close Done only after that verification.
+- Publication approved on 13 September after disclosure of the public repository and the same 18 sample images. The earlier permission hold is superseded.
+- In progress: publish with GitHub Pages, verify exact-commit checks, anonymous source access, served and downloaded HTML hashes, and actual import, guide and export controls. Close Done only after that verification.
 
 ## Device checks not yet available
 

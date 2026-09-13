@@ -12,6 +12,8 @@
   var state = { mode: 'idle', index: -1, epoch: 0, timer: null, speed: 4500, busy: false, sample: null, changed: false, note: '', snapshot: '' };
   var dock, card, shade, hint, target, pointerHeld = false, deferredPause = false;
   var hintButton = null, hintTimer = null;
+  var dismissed = false;
+  try { dismissed = localStorage.getItem('gridsmith.demoDismissed') === 'true'; } catch (e) {}
   function control(selector) { var el = q(selector); if (!visible(el) || el.disabled) throw Error('This control is unavailable in your current view. Keep your work and use Skip step, or return to the view and try again.'); return el; }
   function click(selector) { control(selector).click(); }
   function field(selector, value) { var el = control(selector); el.value = value; el.dispatchEvent(new Event('input', { bubbles: true })); }
@@ -141,8 +143,8 @@
     stopTimer(); state.epoch++; state.busy = false; state.mode = 'idle'; deferredPause = false;
     qa('.guide-host').forEach(function (host) { host.classList.remove('guide-host', 'guide-constrained'); host.style.removeProperty('--guide-clearance'); });
     if (target) target.classList.remove('guide-target');
-    if (card.matches(':popover-open')) card.hidePopover(); if (shade.matches(':popover-open')) shade.hidePopover(); dock.hidden = false;
-    var surface = topSurface(); var focus = surface === document.body ? q('#guide-start') : surface.querySelector('button:not(:disabled),input');
+    if (card.matches(':popover-open')) card.hidePopover(); if (shade.matches(':popover-open')) shade.hidePopover(); dock.hidden = dismissed;
+    var surface = topSurface(); var focus = surface === document.body ? q(dismissed ? '#helpbutton' : '#guide-start') : surface.querySelector('button:not(:disabled),input');
     if (focus) focus.focus({ preventScroll: true });
   }
   function start() {
@@ -186,26 +188,40 @@
   }
   function setup() {
     dock = document.createElement('section'); dock.className = 'guide-dock'; dock.setAttribute('aria-label', 'Demo options');
-    dock.innerHTML = '<div class="guide-dock-copy"><strong>Try the demo samples</strong><span id="guide-start-info">Review a generated grid or take the tour. You confirm imports and downloads.</span><span id="guide-manual-status" role="status" hidden></span></div><div class="guide-dock-actions"><button id="guide-try-import" type="button" aria-describedby="guide-start-info">Try a grid import</button><button id="guide-start" type="button" class="btn-primary" aria-describedby="guide-start-info">Start tour</button></div>';
+    dock.innerHTML = '<div class="guide-dock-copy"><strong>Try the demo samples</strong><span id="guide-start-info">Review a grid or take the tour. Find both in Help anytime.</span><span id="guide-manual-status" role="status" hidden></span></div><div class="guide-dock-actions"><button id="guide-try-import" type="button" aria-describedby="guide-start-info">Try a grid import</button><button id="guide-start" type="button" class="btn-primary" aria-describedby="guide-start-info">Start tour</button></div><button id="guide-dismiss" type="button" aria-label="Dismiss demo invitation" title="Find the demo in Help">×</button>';
+    dock.hidden = dismissed;
     shade = document.createElement('div'); shade.className = 'guide-shade'; shade.setAttribute('popover', 'manual'); shade.setAttribute('aria-hidden', 'true');
     card = document.createElement('section'); card.id = 'guide-card'; card.className = 'guide-card'; card.setAttribute('popover', 'manual'); card.setAttribute('aria-label', 'Gridsmith guided demo');
     card.innerHTML = '<div class="guide-header"><span id="guide-state"></span><span id="guide-count"></span></div><progress id="guide-progress" max="' + steps.length + '" aria-label="Tour progress"></progress><h2 id="guide-title"></h2><p id="guide-description" aria-live="polite"></p><p id="guide-note" role="status" hidden></p><div class="guide-controls"><button id="guide-next" class="btn-primary">Next step</button><button id="guide-pause">Pause tour</button><button id="guide-end">End tour</button></div><div class="guide-options"><label>Speed <select id="guide-speed" aria-label="Tour speed"><option value="2000">Fast · 2s</option><option value="4500" selected>Normal · 4.5s</option><option value="8000">Slow · 8s</option></select></label><button id="guide-skip">Skip step</button><button id="guide-restart">Restart tour</button></div><p id="guide-instruction"></p>';
     hint = document.createElement('div'); hint.id = 'guide-hint'; hint.className = 'guide-hint'; hint.setAttribute('role', 'tooltip'); hint.setAttribute('popover', 'manual');
     hint.addEventListener('pointerenter', function () { clearTimeout(hintTimer); });
     hint.addEventListener('pointerleave', scheduleHintClose);
-    document.body.append(dock, shade, card, hint);
+    q('.main .top').insertAdjacentElement('afterend', dock);
+    document.body.append(shade, card, hint);
+    var help = document.createElement('div'); help.className = 'guide-help-entry help-row';
+    help.innerHTML = '<strong>Demo samples</strong><p>Try a grid import or explore the planner with a guided tour. Your existing work stays in place.</p><div class="guide-dock-actions"><button id="guide-help-import" type="button">Try a grid import</button><button id="guide-help-start" type="button" class="btn-primary">Start tour</button></div><p id="guide-help-status" role="status" hidden></p>';
+    q('#help-dialog .panel-body').prepend(help);
     var details = document.createElement('button'); details.id = 'guide-details'; details.textContent = 'Details'; details.hidden = true; details.setAttribute('aria-describedby', 'guide-hint');
     q('.guide-options').appendChild(details);
     details.onclick = function () { if (hintButton === details && hint.matches(':popover-open')) closeHint(); else { details.dataset.guideHelp = steps[state.index].text; showHint(details); } };
     card.addEventListener('click', function (e) { e.stopPropagation(); });
     q('#guide-start').onclick = start; q('#guide-next').onclick = function () { advance(); }; q('#guide-skip').onclick = function () { advance(true); }; q('#guide-end').onclick = end; q('#guide-restart').onclick = start;
-    q('#guide-try-import').onclick = async function () {
+    q('#guide-dismiss').onclick = function () {
+      dismissed = true; dock.hidden = true;
+      try { localStorage.setItem('gridsmith.demoDismissed', 'true'); } catch (e) {}
+      q('#grid').focus({ preventScroll: true });
+    };
+    q('#guide-help-start').onclick = function () { q('#help-dialog').close(); start(); };
+    async function manualImport(fromHelp) {
+      if (fromHelp) { if (active()) end(); q('#help-dialog').close(); q('#helpbutton').focus({ preventScroll: true }); }
       if (active()) return;
       closeHint();
-      var status = q('#guide-manual-status'); status.hidden = true; status.textContent = '';
+      var status = q(fromHelp ? '#guide-help-status' : '#guide-manual-status'); status.hidden = true; status.textContent = '';
       try { await stageGrid(); }
-      catch (error) { status.textContent = error.message; status.hidden = false; }
-    };
+      catch (error) { status.textContent = error.message; status.hidden = false; if (fromHelp) q('#helpbutton').click(); }
+    }
+    q('#guide-try-import').onclick = function () { manualImport(false); };
+    q('#guide-help-import').onclick = function () { manualImport(true); };
     q('#guide-pause').onclick = function () {
       if (state.mode !== 'paused') return pause();
       if (state.snapshot !== fingerprint()) { state.note = 'Your view or inputs changed. They are preserved. Use Next step to continue explicitly, Skip step, or End tour.'; render(); return; }
