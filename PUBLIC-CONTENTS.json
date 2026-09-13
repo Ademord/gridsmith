@@ -209,8 +209,8 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "sha256": "998e5c735f3e03702fff84897a9122974c3185833df5707134d7c91b6f3111e2",
-      "bytes": 7336
+      "sha256": "ce44d45118897b713114bef45a24a4546f5f8d7a3914500ed5bc1396d9c9707c",
+      "bytes": 8090
     },
     {
       "path": "docs/images/README.md",
@@ -354,8 +354,8 @@
     },
     {
       "path": "tests/planner.test.mjs",
-      "sha256": "df779de93a16444a391672f9863a1429476baccc99bde0392d1ce3141a6b60c8",
-      "bytes": 35435
+      "sha256": "c8ebc23e54f112f8cf7d15e33cab240ccbb54c9b6e51e23aace640fa459cd4b0",
+      "bytes": 35940
     },
     {
       "path": "tests/release_check_test.py",

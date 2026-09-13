@@ -329,9 +329,14 @@ test('keyboard opens and closes details, reorders posts, and undoes the move', t
   const initial = await order(page); const first = planned(page).first(); await first.focus();
   await page.keyboard.press('Enter'); await page.getByRole('dialog', { name: 'Post preview and details' }).waitFor({ state: 'visible' });
   await page.keyboard.press('Escape'); assert.equal(await first.evaluate(node => node === document.activeElement), true);
-  await page.keyboard.press('Alt+ArrowRight'); assert.deepEqual((await order(page)).slice(0, 2), [initial[1], initial[0]]);
-  await page.keyboard.press('Control+z'); assert.deepEqual(await order(page), initial);
-  await page.keyboard.press('Control+Shift+z'); assert.deepEqual((await order(page)).slice(0, 2), [initial[1], initial[0]]);
+  const moved = [initial[1], initial[0], ...initial.slice(2)];
+  await page.keyboard.press('Alt+ArrowRight'); assert.deepEqual(await order(page), moved);
+  await page.keyboard.press('Control+z');
+  await until(async () => JSON.stringify(await order(page)) === JSON.stringify(initial) && await page.locator('#redo').isEnabled(), 'Undo must restore the complete order and make Redo available');
+  assert.deepEqual(await order(page), initial); assert.deepEqual((await state(page)).order, initial);
+  await page.keyboard.press('Control+Shift+z');
+  await until(async () => JSON.stringify(await order(page)) === JSON.stringify(moved) && await page.locator('#undo').isEnabled(), 'Redo must restore the complete moved order and make Undo available');
+  assert.deepEqual(await order(page), moved); assert.deepEqual((await state(page)).order, moved);
   await planned(page).first().focus(); await page.keyboard.press('Space'); await count(page.locator('#grid .tile.selected'), 1);
   await page.keyboard.press('Escape'); await count(page.locator('#grid .tile.selected'), 0);
 }));
